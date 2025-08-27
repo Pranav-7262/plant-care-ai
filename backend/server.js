@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from "cors";
-
+import plantRoutes from "./routes/plantRoutes.js";
 dotenv.config();
 connectDB();
 
@@ -14,6 +14,8 @@ app.use(express.json()); // to parse JSON body
 
 // Routes
 app.use("/api/auth", authRoutes); //this is a middleware for auth routes
+
+app.use("/api/plants", plantRoutes); //this is a middleware for plant routes
 
 // app.use((req, res) => {
 //   res.status(404).json({ message: "Route not found" });
