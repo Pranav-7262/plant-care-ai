@@ -6,8 +6,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Plants from "./pages/Plants";
 import PlantDetails from "./pages/PlantDetails";
 import MyPlants from "./pages/MyPlants";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
+
+import AuthPage from "./pages/AuthPage";
 
 function App() {
   return (
@@ -19,8 +19,7 @@ function App() {
           <Route path="explore" element={<Plants />} />
           <Route path="/plants/:id" element={<PlantDetails />} />
           <Route path="my-plants" element={<MyPlants />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/auth" element={<AuthPage />} />
 
           <Route
             path="*"

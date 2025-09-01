@@ -1,16 +1,33 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  // 🔹 Check if user is logged in (on mount)
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userInfo");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // 🔹 Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo"); // remove token/user
+    setUser(null);
+    navigate("/auth"); // redirect to sign in page
+  };
+
   const navItemClass = ({ isActive }) =>
     isActive
-      ? "underline  font-semibold text-white"
+      ? "underline font-semibold text-white"
       : "hover:underline text-white";
 
   return (
-    <nav className="bg-[#355e3b]  text-gray-100 py-4 flex items-center justify-between sticky top-0 w-full z-50 transition duration-300 px-[3vw] md:px-[4vw] lg:px-[14vw]">
+    <nav className="bg-[#355e3b] text-gray-100 py-4 flex items-center justify-between sticky top-0 w-full z-50 transition duration-300 px-[3vw] md:px-[4vw] lg:px-[14vw]">
       <div className="text-xl font-bold mr-auto">🌱 PlantBot</div>
 
       <div
@@ -28,15 +45,25 @@ const NavBar = () => {
           <NavLink to="/explore" className={navItemClass}>
             Explore
           </NavLink>
-          <NavLink to="/my-plants" className={`${navItemClass}`}>
+          <NavLink to="/my-plants" className={navItemClass}>
             My-Plants
           </NavLink>
-          <NavLink to="/signin" className={`${navItemClass}`}>
-            SignIn
-          </NavLink>
-          <NavLink to="/signup" className={`${navItemClass}`}>
-            SignUp
-          </NavLink>
+
+          {/* 🔹 Conditional auth buttons */}
+          {!user ? (
+            <>
+              <NavLink to="/auth" className={navItemClass}>
+                Sign In
+              </NavLink>
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="text-white hover:underline"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
 
