@@ -1,33 +1,35 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import axios from "axios";
+import { useState } from "react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const endpoint = isLogin
         ? "http://localhost:5000/api/auth/login"
         : "http://localhost:5000/api/auth/register";
 
       const payload = isLogin
-        ? { email: form.email, password: form.password }
-        : form;
+        ? { email: data.email, password: data.password }
+        : data;
 
-      const { data } = await axios.post(endpoint, payload);
-
-      localStorage.setItem("userInfo", JSON.stringify(data)); // ✅ save token
+      const res = await axios.post(endpoint, payload);
+      localStorage.setItem("userInfo", JSON.stringify(res.data));
       alert(`${isLogin ? "Login" : "Registration"} successful!`);
-      window.location.href = "/my-plants"; // redirect after success
+      window.location.href = "/my-plants";
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong!");
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Something went wrong!";
+      alert(message);
     }
   };
 
@@ -38,38 +40,55 @@ export default function AuthPage() {
           {isLogin ? "Sign In" : "Create Account"}
         </h1>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           {!isLogin && (
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={form.name}
-              onChange={handleChange}
-              className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
-              required
-            />
+            <>
+              <input
+                {...register("name", { required: "Name is required" })}
+                placeholder="Full Name"
+                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+              {errors.name && (
+                <span className="text-red-500 text-sm">
+                  {errors.name.message}
+                </span>
+              )}
+            </>
           )}
 
           <input
-            type="email"
-            name="email"
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^\S+@\S+$/i,
+                message: "Invalid email format",
+              },
+            })}
             placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
             className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
-            required
           />
+          {errors.email && (
+            <span className="text-red-500 text-sm">{errors.email.message}</span>
+          )}
 
           <input
             type="password"
-            name="password"
+            {...register("password", {
+              required: "Password is required",
+              pattern: {
+                value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+                message:
+                  "Password must be at least 6 characters and contain at least one letter and one number",
+              },
+            })}
             placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
             className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
-            required
           />
+          {errors.password && (
+            <span className="text-red-500 text-sm">
+              {errors.password.message}
+            </span>
+          )}
 
           <button
             type="submit"

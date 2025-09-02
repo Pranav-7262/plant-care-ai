@@ -3,30 +3,45 @@ import mongoose from "mongoose";
 const plantSchema = new mongoose.Schema(
   {
     user: {
-      //this is for associating plants with specific users
+      // Associate plants with specific users
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     name: {
-      //this is the name of the plant
       type: String,
-      required: true,
+      required: [true, "Plant name is required"],
+      trim: true,
+      minlength: [2, "Plant name must be at least 2 characters"],
     },
     species: {
       type: String,
-      required: true,
+      required: [true, "Species is required"],
+      trim: true,
     },
     location: {
       type: String,
       required: true,
+      enum: ["Living Room", "Bedroom", "Balcony", "Garden", "Office", "Other"],
+      default: "Other",
+    },
+    image: {
+      type: String, // URL for plant image
+      default: "",
     },
     lastWatered: {
       type: Date,
       required: true,
+      default: Date.now,
     },
     nextWatering: {
       type: Date,
+    },
+    wateringFrequency: {
+      type: Number, // days between watering
+      required: true,
+      default: 7,
+      min: [1, "Watering frequency must be at least 1 day"],
     },
     health: {
       type: String,
@@ -35,14 +50,25 @@ const plantSchema = new mongoose.Schema(
     },
     notes: {
       type: String,
-      default: "",
+      maxlength: 300,
+      trim: true,
     },
-    image: {
-      type: String, // store image URL or file path
-      required: false,
+    reminderEnabled: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Plant", plantSchema); //this creates a model named "Plant" using the plantSchema
+// 🔹 Middleware: auto-calculate nextWatering before saving
+plantSchema.pre("save", function (next) {
+  if (this.lastWatered && this.wateringFrequency) {
+    const nextDate = new Date(this.lastWatered);
+    nextDate.setDate(nextDate.getDate() + this.wateringFrequency);
+    this.nextWatering = nextDate;
+  }
+  next();
+});
+
+export default mongoose.model("Plant", plantSchema);
