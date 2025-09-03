@@ -56,6 +56,7 @@ const plantSchema = new mongoose.Schema(
     reminderEnabled: {
       type: Boolean,
       default: true,
+      required: true,
     },
   },
   { timestamps: true }

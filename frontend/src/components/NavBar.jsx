@@ -1,3 +1,4 @@
+// src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -6,7 +7,6 @@ const NavBar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // 🔹 Check if user is logged in (on mount)
   useEffect(() => {
     const storedUser = localStorage.getItem("userInfo");
     if (storedUser) {
@@ -14,7 +14,6 @@ const NavBar = () => {
     }
   }, []);
 
-  // 🔹 Logout function
   const handleLogout = () => {
     localStorage.removeItem("userInfo"); // remove token/user
     setUser(null);
@@ -22,9 +21,7 @@ const NavBar = () => {
   };
 
   const navItemClass = ({ isActive }) =>
-    isActive
-      ? "underline font-semibold text-white"
-      : "hover:underline text-white";
+    isActive ? "underline font-bold text-white" : "hover:underline text-white";
 
   return (
     <nav className="bg-[#355e3b] text-gray-100 py-4 flex items-center justify-between sticky top-0 w-full z-50 transition duration-300 px-[3vw] md:px-[4vw] lg:px-[14vw]">
@@ -49,13 +46,16 @@ const NavBar = () => {
             My-Plants
           </NavLink>
 
-          {/* 🔹 Conditional auth buttons */}
+          {user && (
+            <NavLink to="/add-plant" className={navItemClass}>
+              Add-Plant
+            </NavLink>
+          )}
+
           {!user ? (
-            <>
-              <NavLink to="/auth" className={navItemClass}>
-                Sign In
-              </NavLink>
-            </>
+            <NavLink to="/auth" className={navItemClass}>
+              Sign In
+            </NavLink>
           ) : (
             <button
               onClick={handleLogout}
@@ -67,7 +67,6 @@ const NavBar = () => {
         </div>
       </div>
 
-      {/* Right: Hamburger Button (mobile only) */}
       <button className="ml-auto md:hidden" onClick={() => setIsOpen(!isOpen)}>
         <svg
           className="w-6 h-6"
