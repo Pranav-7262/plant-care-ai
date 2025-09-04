@@ -41,6 +41,7 @@ export const logoutUser = () => {
 export const fetchPlants = (page = 1, keyword = "") =>
   API.get(`/plants?page=${page}&keyword=${keyword}`);
 
+export const fetchPlantById = (id) => API.get(`/plants/${id}`);
 export const addPlant = (plantData) => API.post("/plants", plantData);
 
 export const updatePlant = (id, plantData) =>

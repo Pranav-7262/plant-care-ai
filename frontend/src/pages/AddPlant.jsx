@@ -1,9 +1,14 @@
-import { useState } from "react";
-import { addPlant } from "../api";
-import { toast, ToastContainer } from "react-toastify";
+// src/pages/AddPlant.jsx
+import { useEffect, useState } from "react";
+import { addPlant, updatePlant, fetchPlantById } from "../api";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function AddPlant() {
+  const { id } = useParams(); // check if editing
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: "",
     species: "",
@@ -17,48 +22,81 @@ export default function AddPlant() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const defaultImage =
+    "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=300&q=80";
+
+  // 🔹 If id exists → fetch plant details for edit
+  useEffect(() => {
+    const loadPlant = async () => {
+      if (id) {
+        try {
+          const { data } = await fetchPlantById(id);
+          setForm({
+            name: data.name || "",
+            species: data.species || "",
+            location: data.location || "Living Room",
+            lastWatered: data.lastWatered?.split("T")[0] || "",
+            wateringFrequency: data.wateringFrequency || 7,
+            health: data.health || "Healthy",
+            notes: data.notes || "",
+            image: data.image || "",
+            reminderEnabled: data.reminderEnabled ?? true,
+          });
+        } catch (err) {
+          console.error("Error loading plant:", err);
+          setError("⚠️ Failed to load plant details.");
+        }
+      }
+    };
+    loadPlant();
+  }, [id]);
+
+  // 🔹 Handle form change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
+  // 🔹 Submit (Add or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
-      await addPlant(form);
-      setForm({
-        name: "",
-        species: "",
-        location: "Living Room",
-        lastWatered: "",
-        wateringFrequency: 7,
-        health: "Healthy",
-        notes: "",
-        image: "",
-        reminderEnabled: true,
-      });
-      toast.success("Plant added successfully! 🌿");
+      if (id) {
+        await updatePlant(id, form);
+        toast.success("Plant updated successfully!");
+      } else {
+        await addPlant(form);
+        toast.success("Plant added successfully!");
+      }
+
+      // ✅ Wait 1.8 seconds before navigating
+      setTimeout(() => {
+        navigate("/my-plants");
+      }, 3000);
     } catch (err) {
-      console.error("Add plant failed", err);
-      toast.error("Failed to add plant");
+      console.error("Save plant failed", err);
+      toast.error("Failed to save plant");
+      setError("Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
-  const defaultImage =
-    "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=300&q=80";
-
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
-      <ToastContainer />
-      <h2 className="text-2xl font-bold mb-6 text-green-700">🌱 Add a Plant</h2>
+    <div className="items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans bg-gray-100">
+      <h2 className="text-2xl font-bold mb-6 text-green-700">
+        {id ? "✏️ Update Plant" : "🌱 Add a Plant"}
+      </h2>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white shadow-lg rounded-2xl p-6"
       >
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -70,7 +108,7 @@ export default function AddPlant() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
             placeholder="E.g. Tulsi"
           />
         </div>
@@ -85,7 +123,7 @@ export default function AddPlant() {
             value={form.species}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
             placeholder="E.g. Ocimum tenuiflorum"
           />
         </div>
@@ -98,7 +136,7 @@ export default function AddPlant() {
             name="location"
             value={form.location}
             onChange={handleChange}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
           >
             <option>Living Room</option>
             <option>Bedroom</option>
@@ -119,7 +157,7 @@ export default function AddPlant() {
             value={form.lastWatered}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -133,7 +171,7 @@ export default function AddPlant() {
             value={form.wateringFrequency}
             onChange={handleChange}
             min={1}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -145,7 +183,7 @@ export default function AddPlant() {
             name="health"
             value={form.health}
             onChange={handleChange}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
           >
             <option>Healthy</option>
             <option>Needs Attention</option>
@@ -162,7 +200,7 @@ export default function AddPlant() {
             value={form.notes}
             onChange={handleChange}
             maxLength={300}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
             placeholder="E.g. Sacred plant, needs sunlight"
           />
         </div>
@@ -176,7 +214,7 @@ export default function AddPlant() {
             name="image"
             value={form.image}
             onChange={handleChange}
-            className="w-full p-2 border rounded-lg mb-2"
+            className="w-full p-2 border rounded-lg mb-2 focus:ring-2 focus:ring-green-500"
             placeholder="Enter image URL"
           />
           <img
@@ -205,7 +243,7 @@ export default function AddPlant() {
               : "bg-green-600 hover:bg-green-700"
           }`}
         >
-          {loading ? "Adding Plant..." : "Add Plant"}
+          {loading ? "Saving..." : id ? "Update Plant" : "Add Plant"}
         </button>
       </form>
     </div>

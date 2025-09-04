@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   return (
     <footer className="bg-[#355e3b] text-white mt-0">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {/* Section 1: About */}
+      <div className="max-w-7xl mx-auto px-5 py-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div>
           <h2 className="text-lg font-semibold mb-2">PlantCareAI</h2>
           <p className="text-sm text-gray-300">
@@ -13,7 +12,6 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Section 2: Quick Links */}
         <div>
           <h2 className="text-lg font-semibold mb-2">Quick Links</h2>
           <ul className="text-sm text-gray-300 space-y-1">

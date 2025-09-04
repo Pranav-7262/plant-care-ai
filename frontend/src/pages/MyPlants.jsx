@@ -2,43 +2,59 @@ import { useEffect, useState } from "react";
 import { fetchPlants, deletePlant } from "../api";
 import { motion } from "framer-motion";
 import { Search, Trash2, Edit, Eye, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const defaultPlantImg =
   "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=300&q=80";
+
 export default function MyPlants() {
   const [plants, setPlants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [user, setUser] = useState(null); // ✅ user state
 
+  const navigate = useNavigate();
   useEffect(() => {
-    const getPlants = async () => {
-      try {
-        const { data } = await fetchPlants();
-        setPlants(data.plants || []);
-      } catch (err) {
-        console.error("Error fetching plants:", err);
-        setError("⚠️ Failed to load plants. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    getPlants();
+    const storedUser = localStorage.getItem("userInfo");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      const getPlants = async () => {
+        try {
+          const { data } = await fetchPlants();
+          setPlants(data.plants || []);
+        } catch (err) {
+          console.error("Error fetching plants:", err);
+          setError("⚠️ Failed to load plants. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      getPlants();
+    } else {
+      setLoading(false); // ✅ Stop loading if no user
+    }
   }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this plant?")) return;
+
     try {
       await deletePlant(id);
       setPlants((prev) => prev.filter((plant) => plant._id !== id));
+      toast.success("Plant deleted successfully!");
     } catch (err) {
       console.error("Error deleting plant:", err);
-      alert("❌ Failed to delete plant");
+      toast.error("❌ Failed to delete plant");
     }
   };
 
-  const handleView = (plant) => {
-    alert(`Viewing details for "${plant.name}" 🌿`);
+  const handleView = (id) => {
+    navigate(`/view-plant/${id}`);
   };
 
   const filteredPlants = plants.filter(
@@ -56,6 +72,25 @@ export default function MyPlants() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="text-center items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans mt-20">
+        <p className="text-2xl font-semibold text-gray-800 mb-4">
+          🔐 Please sign in to manage your plants
+        </p>
+        <p className="text-gray-600 mb-6">
+          Access your personalized plant collection, reminders, and more.
+        </p>
+        <a
+          href="/auth"
+          className="inline-block px-6 py-2 bg-green-600 text-white font-medium rounded-lg shadow hover:bg-green-700 transition-colors"
+        >
+          Sign In
+        </a>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <p className="text-center text-red-600 font-semibold mt-10">{error}</p>
@@ -63,12 +98,11 @@ export default function MyPlants() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans">
       <h1 className="text-3xl font-bold mb-6 text-green-800 flex items-center gap-2">
         🌿 My Plants
       </h1>
 
-      {/* 🔍 Search Bar */}
       <div className="flex items-center bg-white rounded-xl shadow-sm px-4 py-2 mb-8 max-w-md border border-gray-300 focus-within:ring-2 ring-green-300">
         <Search className="w-5 h-5 text-gray-500" />
         <input
@@ -80,7 +114,6 @@ export default function MyPlants() {
         />
       </div>
 
-      {/* 🌱 Plant Cards */}
       {filteredPlants.length === 0 ? (
         <motion.p
           initial={{ opacity: 0 }}
@@ -107,16 +140,14 @@ export default function MyPlants() {
               {/* Hover action buttons */}
               <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button
-                  onClick={() => handleView(plant)}
-                  className="p-1 rounded-full bg-blue-100 hover:bg-blue-200"
-                  title="View"
+                  onClick={() => handleView(plant._id)}
+                  className="text-blue-500 hover:text-blue-700"
                 >
-                  <Eye className="w-4 h-4 text-blue-600" />
+                  <Eye size={18} />
                 </button>
+
                 <button
-                  onClick={() =>
-                    alert(`Update feature coming soon for ${plant.name}`)
-                  }
+                  onClick={() => navigate(`/add-plant/${plant._id}`)}
                   className="p-1 rounded-full bg-yellow-100 hover:bg-yellow-200"
                   title="Edit"
                 >
@@ -131,7 +162,6 @@ export default function MyPlants() {
                 </button>
               </div>
 
-              {/* ✅ Default image fallback */}
               <img
                 src={plant.image || defaultPlantImg}
                 alt={plant.name}
@@ -144,7 +174,6 @@ export default function MyPlants() {
               <p className="text-gray-500 italic text-sm">{plant.species}</p>
               <p className="mt-1 text-sm">📍 {plant.location}</p>
 
-              {/* 💧 Next watering */}
               {plant.nextWatering && (
                 <p className="mt-2 text-sm">
                   💧 Next Watering:{" "}
@@ -154,7 +183,6 @@ export default function MyPlants() {
                 </p>
               )}
 
-              {/* 🌱 Health */}
               {plant.health && (
                 <p
                   className={`mt-1 text-sm font-medium ${
@@ -167,19 +195,16 @@ export default function MyPlants() {
                 </p>
               )}
 
-              {/* 📝 Notes */}
               {plant.notes && (
                 <p className="mt-2 text-sm text-gray-600">{plant.notes}</p>
               )}
 
-              {/* 🔔 Reminder */}
               {plant.reminder && (
                 <p className="mt-3 flex items-center gap-1 text-sm text-indigo-600 font-medium">
                   <Bell className="w-4 h-4" /> Reminder: {plant.reminder}
                 </p>
               )}
 
-              {/* 🕒 Last Updated */}
               {plant.updatedAt && (
                 <p className="mt-2 text-xs text-gray-500 italic">
                   Last updated:{" "}
