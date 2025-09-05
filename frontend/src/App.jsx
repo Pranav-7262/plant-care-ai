@@ -12,6 +12,7 @@ import AddPlant from "./pages/AddPlant";
 import ViewPlant from "./components/ViewPlant";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Settings from "./components/Settings";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/view-plant/:id" element={<ViewPlant />} />
           <Route path="my-plants" element={<MyPlants />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/settings" element={<Settings />} />
 
           <Route
             path="*"
@@ -40,17 +42,15 @@ function App() {
       </Routes>
       <ToastContainer
         position="top-right"
-        autoClose={3000}
         hideProgressBar={false}
         newestOnTop={true}
-        closeOnClick
         pauseOnHover
         draggable
-        theme="dark" // 🌙 dark mode
+        theme="dark"
         toastStyle={{
-          backgroundColor: "#1f2937", // Tailwind gray-800
-          color: "#f9fafb", // white/gray-50 text
-          borderRadius: "0.75rem", // rounded-xl
+          backgroundColor: "#1f2937",
+          color: "#f9fafb",
+          borderRadius: "0.75rem",
           fontSize: "0.95rem",
           padding: "12px 16px",
         }}

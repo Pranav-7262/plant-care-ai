@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { addPlant, updatePlant, fetchPlantById } from "../api";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function AddPlant() {
@@ -73,10 +72,9 @@ export default function AddPlant() {
         toast.success("Plant added successfully!");
       }
 
-      // ✅ Wait 1.8 seconds before navigating
       setTimeout(() => {
         navigate("/my-plants");
-      }, 3000);
+      }, 3500);
     } catch (err) {
       console.error("Save plant failed", err);
       toast.error("Failed to save plant");

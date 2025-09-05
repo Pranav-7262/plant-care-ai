@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useState } from "react";
-import "react-toastify/dist/ReactToastify.css";
 import { toast } from "react-toastify";
 
 export default function AuthPage() {

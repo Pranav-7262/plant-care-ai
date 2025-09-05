@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Search, Trash2, Edit, Eye, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const defaultPlantImg =
   "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=300&q=80";
@@ -14,7 +13,7 @@ export default function MyPlants() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [user, setUser] = useState(null); // ✅ user state
+  const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
