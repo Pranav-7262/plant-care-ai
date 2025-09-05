@@ -1,6 +1,7 @@
 // src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +18,7 @@ const NavBar = () => {
   const handleLogout = () => {
     localStorage.removeItem("userInfo"); // remove token/user
     setUser(null);
+    toast.success("Logged out successfully!");
     navigate("/auth"); // redirect to sign in page
   };
 
