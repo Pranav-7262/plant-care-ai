@@ -122,7 +122,7 @@ export default function MyPlants() {
           No plants found. Try adding one!
         </motion.p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="flex flex-col gap-6">
           {filteredPlants.map((plant, index) => (
             <motion.div
               key={plant._id}
@@ -133,10 +133,10 @@ export default function MyPlants() {
                 type: "spring",
                 stiffness: 200,
               }}
-              whileHover={{ scale: 1.02 }}
-              className="relative group bg-white p-5 rounded-2xl shadow-md border border-gray-200 hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.01 }}
+              className="relative group flex flex-col sm:flex-row bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-xl transition-all overflow-hidden"
             >
-              {/* Hover action buttons */}
+              {/* Hover Action Buttons */}
               <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <button
                   onClick={() => handleView(plant._id)}
@@ -144,7 +144,6 @@ export default function MyPlants() {
                 >
                   <Eye size={18} />
                 </button>
-
                 <button
                   onClick={() => navigate(`/add-plant/${plant._id}`)}
                   className="p-1 rounded-full bg-yellow-100 hover:bg-yellow-200"
@@ -161,58 +160,70 @@ export default function MyPlants() {
                 </button>
               </div>
 
-              <img
-                src={plant.image || defaultPlantImg}
-                alt={plant.name}
-                className="w-full h-40 object-cover rounded-xl mb-4"
-              />
+              {/* Image Side */}
+              <div className="flex-shrink-0 w-full sm:w-48 h-40 sm:h-auto">
+                <img
+                  src={plant.image || defaultPlantImg}
+                  alt={plant.name}
+                  className="w-full h-full object-cover sm:rounded-l-2xl sm:rounded-r-none rounded-t-2xl sm:rounded-t-none"
+                />
+              </div>
 
-              <h2 className="text-xl font-semibold text-green-700 mb-1">
-                {plant.name}
-              </h2>
-              <p className="text-gray-500 italic text-sm">{plant.species}</p>
-              <p className="mt-1 text-sm">📍 {plant.location}</p>
+              {/* Content Side */}
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-green-700 mb-1">
+                    {plant.name}
+                  </h2>
+                  <p className="text-gray-500 italic text-sm">
+                    {plant.species}
+                  </p>
+                  <p className="mt-1 text-sm">📍 {plant.location}</p>
 
-              {plant.nextWatering && (
-                <p className="mt-2 text-sm">
-                  💧 Next Watering:{" "}
-                  <span className="font-medium text-green-600">
-                    {plant.nextWatering.split("T")[0]}
-                  </span>
-                </p>
-              )}
+                  {plant.nextWatering && (
+                    <p className="mt-2 text-sm">
+                      💧 Next Watering:{" "}
+                      <span className="font-medium text-green-600">
+                        {plant.nextWatering.split("T")[0]}
+                      </span>
+                    </p>
+                  )}
 
-              {plant.health && (
-                <p
-                  className={`mt-1 text-sm font-medium ${
-                    plant.health === "Healthy"
-                      ? "text-green-600"
-                      : "text-orange-600"
-                  }`}
-                >
-                  🌱 {plant.health}
-                </p>
-              )}
+                  {plant.health && (
+                    <p
+                      className={`mt-1 text-sm font-medium ${
+                        plant.health === "Healthy"
+                          ? "text-green-600"
+                          : "text-orange-600"
+                      }`}
+                    >
+                      🌱 {plant.health}
+                    </p>
+                  )}
 
-              {plant.notes && (
-                <p className="mt-2 text-sm text-gray-600">{plant.notes}</p>
-              )}
+                  {plant.notes && (
+                    <p className="mt-2 text-sm text-gray-600">{plant.notes}</p>
+                  )}
+                </div>
 
-              {plant.reminder && (
-                <p className="mt-3 flex items-center gap-1 text-sm text-indigo-600 font-medium">
-                  <Bell className="w-4 h-4" /> Reminder: {plant.reminder}
-                </p>
-              )}
+                <div className="mt-3">
+                  {plant.reminder && (
+                    <p className="flex items-center gap-1 text-sm text-indigo-600 font-medium">
+                      <Bell className="w-4 h-4" /> Reminder: {plant.reminder}
+                    </p>
+                  )}
 
-              {plant.updatedAt && (
-                <p className="mt-2 text-xs text-gray-500 italic">
-                  Last updated:{" "}
-                  {new Date(plant.updatedAt).toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </p>
-              )}
+                  {plant.updatedAt && (
+                    <p className="mt-1 text-xs text-gray-500 italic">
+                      Last updated:{" "}
+                      {new Date(plant.updatedAt).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
