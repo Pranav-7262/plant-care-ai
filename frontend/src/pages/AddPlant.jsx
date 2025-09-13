@@ -96,6 +96,7 @@ export default function AddPlant() {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white shadow-lg rounded-2xl p-6"
       >
+        {/* Plant Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Plant Name
@@ -111,6 +112,7 @@ export default function AddPlant() {
           />
         </div>
 
+        {/* Species */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Species
@@ -126,6 +128,29 @@ export default function AddPlant() {
           />
         </div>
 
+        {/* 🌿 Category - NEW FIELD */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Category
+          </label>
+          <select
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Select Category</option>
+            <option value="Indoor">Indoor</option>
+            <option value="Outdoor">Outdoor</option>
+            <option value="Flowering">Flowering</option>
+            <option value="Succulent">Succulent</option>
+            <option value="Herb">Herb</option>
+            <option value="Tree">Tree</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        {/* Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Location

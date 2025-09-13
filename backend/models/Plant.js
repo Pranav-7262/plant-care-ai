@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const plantSchema = new mongoose.Schema(
   {
     user: {
-      // Associate plants with specific users
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -23,6 +22,19 @@ const plantSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: ["Living Room", "Bedroom", "Balcony", "Garden", "Office", "Other"],
+      default: "Other",
+    },
+    category: {
+      type: String,
+      enum: [
+        "Indoor",
+        "Outdoor",
+        "Flowering",
+        "Succulent",
+        "Herb",
+        "Tree",
+        "Other",
+      ],
       default: "Other",
     },
     image: {
@@ -57,6 +69,10 @@ const plantSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       required: true,
+    },
+    favourite: {
+      type: Boolean,
+      default: false, // toggle when user clicks ❤️ icon
     },
   },
   { timestamps: true }

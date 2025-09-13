@@ -48,3 +48,7 @@ export const updatePlant = (id, plantData) =>
   API.put(`/plants/${id}`, plantData);
 
 export const deletePlant = (id) => API.delete(`/plants/${id}`);
+export const toggleFavourite = async (id) => {
+  const { data } = await API.patch(`/plants/${id}/favourite`);
+  return data; // return updated plant
+};

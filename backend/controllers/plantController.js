@@ -23,6 +23,7 @@ export const addPlant = asyncHandler(async (req, res) => {
     health,
     notes,
     reminderEnabled,
+    category,
   } = req.body;
 
   if (!name || !species) {
@@ -30,12 +31,12 @@ export const addPlant = asyncHandler(async (req, res) => {
     throw new Error("Please provide both name and species");
   }
 
-  // inside addPlant
   const plant = new Plant({
     user: req.user._id,
     name,
     species,
     location,
+    category,
     image,
     lastWatered,
     wateringFrequency,
@@ -44,17 +45,12 @@ export const addPlant = asyncHandler(async (req, res) => {
     reminderEnabled,
   });
 
-  // auto calculate nextWatering
-  if (plant.lastWatered && plant.wateringFrequency) {
-    plant.nextWatering = new Date(
-      new Date(plant.lastWatered).getTime() +
-        plant.wateringFrequency * 24 * 60 * 60 * 1000
-    );
-  }
-
   // Auto-calc next watering
-  if (lastWatered && wateringFrequency) {
-    plant.nextWatering = calculateNextWatering(lastWatered, wateringFrequency);
+  if (plant.lastWatered && plant.wateringFrequency) {
+    plant.nextWatering = calculateNextWatering(
+      plant.lastWatered,
+      plant.wateringFrequency
+    );
   }
 
   const createdPlant = await plant.save();
@@ -76,7 +72,8 @@ export const getPlants = asyncHandler(async (req, res) => {
 
   let plants = await Plant.find({ user: req.user._id, ...keyword })
     .limit(pageSize)
-    .skip(pageSize * (page - 1));
+    .skip(pageSize * (page - 1))
+    .sort({ createdAt: -1 });
 
   // Add watering reminders
   plants = plants.map((plant) => {
@@ -109,7 +106,6 @@ export const getPlants = asyncHandler(async (req, res) => {
 // @route   GET /api/plants/:id
 // @access  Private
 export const getPlantById = asyncHandler(async (req, res) => {
-  //
   const plant = await Plant.findById(req.params.id);
 
   if (!plant || plant.user.toString() !== req.user._id.toString()) {
@@ -124,7 +120,6 @@ export const getPlantById = asyncHandler(async (req, res) => {
 // @route   PUT /api/plants/:id
 // @access  Private
 export const updatePlant = asyncHandler(async (req, res) => {
-  //this is for updating plant details
   const plant = await Plant.findById(req.params.id);
 
   if (!plant || plant.user.toString() !== req.user._id.toString()) {
@@ -142,18 +137,21 @@ export const updatePlant = asyncHandler(async (req, res) => {
     health,
     notes,
     reminderEnabled,
+    category,
+    favourite,
   } = req.body;
 
-  // Update fields if provided
   if (name) plant.name = name;
   if (species) plant.species = species;
   if (location) plant.location = location;
+  if (category) plant.category = category;
   if (image) plant.image = image;
   if (lastWatered) plant.lastWatered = lastWatered;
   if (wateringFrequency) plant.wateringFrequency = wateringFrequency;
   if (health) plant.health = health;
   if (notes) plant.notes = notes;
   if (reminderEnabled !== undefined) plant.reminderEnabled = reminderEnabled;
+  if (favourite !== undefined) plant.favourite = favourite;
 
   // Recalculate next watering
   if (plant.lastWatered && plant.wateringFrequency) {
@@ -180,4 +178,24 @@ export const deletePlant = asyncHandler(async (req, res) => {
 
   await plant.deleteOne();
   res.json({ message: "Plant removed" });
+});
+
+// @desc    Toggle favourite
+// @route   PATCH /api/plants/:id/favourite
+// @access  Private
+export const toggleFavourite = asyncHandler(async (req, res) => {
+  const plant = await Plant.findById(req.params.id);
+
+  if (!plant || plant.user.toString() !== req.user._id.toString()) {
+    res.status(404);
+    throw new Error("Plant not found");
+  }
+
+  plant.favourite = !plant.favourite;
+  await plant.save();
+
+  res.json({
+    message: "Favourite status updated",
+    favourite: plant.favourite,
+  });
 });
