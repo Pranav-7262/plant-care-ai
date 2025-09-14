@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPlants, deletePlant, toggleFavourite } from "../api";
 import { motion } from "framer-motion";
+import Spinner from "../components/Spinner";
 
 import {
   Search,
@@ -24,7 +25,7 @@ const defaultPlantImg =
 
 export default function MyPlants() {
   const [plants, setPlants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [user, setUser] = useState(null);
@@ -70,7 +71,7 @@ export default function MyPlants() {
     // Optimistic update
     setPlants((prevPlants) =>
       prevPlants.map((p) =>
-        p._id === plantId ? { ...p, isFavourite: !p.isFavourite } : p
+        p._id === plantId ? { ...p, favourite: !p.favourite } : p
       )
     );
 
@@ -84,7 +85,7 @@ export default function MyPlants() {
       // rollback on failure
       setPlants((prevPlants) =>
         prevPlants.map((p) =>
-          p._id === plantId ? { ...p, isFavourite: !p.isFavourite } : p
+          p._id === plantId ? { ...p, favourite: !p.favourite } : p
         )
       );
     }
@@ -102,15 +103,11 @@ export default function MyPlants() {
   );
 
   if (loading) {
-    return (
-      <p className="text-center text-lg animate-pulse text-green-700 mt-10">
-        Loading your plants...
-      </p>
-    );
+    return <Spinner />;
   }
 
   if (!user) {
-    <NoUser />;
+    return <NoUser />;
   }
 
   if (error) {

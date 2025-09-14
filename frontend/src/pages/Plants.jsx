@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PlantCard from "../components/PlantCard";
+import Spinner from "../components/Spinner";
 
 const Plants = () => {
   const [plantData, setPlantData] = useState([]);
@@ -33,7 +34,7 @@ const Plants = () => {
       </h1>
 
       {loading ? (
-        <p className="text-center text-lg text-gray-600">Loading...</p>
+        <Spinner />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 place-items-center">
           {plantData.map((item) => (
