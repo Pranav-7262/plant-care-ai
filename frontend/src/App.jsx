@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Plants from "./pages/Plants";
 import PlantDetails from "./pages/PlantDetails";
 import MyPlants from "./pages/MyPlants";
+import FavouritePlants from "./components/FavouritePlants";
 
 import AuthPage from "./pages/AuthPage";
 import AddPlant from "./pages/AddPlant";
@@ -29,6 +30,7 @@ function App() {
           <Route path="my-plants" element={<MyPlants />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/favourite-plants" element={<FavouritePlants />} />
 
           <Route
             path="*"

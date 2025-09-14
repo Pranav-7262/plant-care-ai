@@ -76,8 +76,11 @@ export default function MyPlants() {
 
     try {
       await toggleFavourite(plantId); // confirm with backend
+      toast.success("Favourite status updated!");
     } catch (error) {
       console.error("❌ Error updating favourite:", error);
+      toast.error("❌ Failed to update favourite");
+
       // rollback on failure
       setPlants((prevPlants) =>
         prevPlants.map((p) =>

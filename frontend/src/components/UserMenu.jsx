@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { User, LogOut, PlusCircle, Leaf, Settings } from "lucide-react";
+import { User, LogOut, PlusCircle, Leaf, Settings, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function UserMenu({ user, onLogout }) {
@@ -43,6 +43,15 @@ export default function UserMenu({ user, onLogout }) {
                 onClick={() => setOpen(false)}
               >
                 <Leaf size={16} /> My Plants
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/favourite-plants"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
+                onClick={() => setOpen(false)}
+              >
+                <Heart size={16} className="text-red-500" /> Favourite Plants
               </Link>
             </li>
             <li>
