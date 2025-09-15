@@ -118,19 +118,46 @@ export default function MyPlants() {
 
   return (
     <div className="items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans">
-      <h1 className="text-3xl font-bold mb-6 text-green-800 flex items-center gap-2">
-        <Sprout className="w-8 h-8 text-green-700" /> My Plants
-      </h1>
+      <div className="mb-10">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-green-900 flex items-center gap-3">
+          <Sprout className="w-10 h-10 text-green-700" />
+          <span>Your Plant Collection</span>
+        </h1>
 
-      <div className="flex items-center bg-white rounded-xl shadow-sm px-4 py-2 mb-8 max-w-md border border-gray-300 focus-within:ring-2 ring-green-300">
-        <Search className="w-5 h-5 text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search plants..."
-          className="ml-3 w-full outline-none text-sm"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <p className="text-base sm:text-lg text-gray-600 mt-2 max-w-xl ml-12 sm:ml-0 leading-relaxed">
+          Track, manage, and care for your favorite plants{" "}
+          <span className="inline-block animate-pulse">🌿</span>
+        </p>
+
+        <div className="max-w-full h-1 bg-green-500 rounded-full mt-4 ml-12 sm:ml-0" />
+      </div>
+
+      <div className="flex items-center mb-10 gap-6 px-1 max-w-full">
+        <div className="relative flex-grow">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="w-5 h-5 text-gray-400 group-focus-within:text-green-500 transition-colors duration-300" />
+          </div>
+
+          <input
+            type="text"
+            placeholder="Search your plants..."
+            className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-300 shadow-sm text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition-all duration-300 bg-white hover:shadow-md"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Total plants count - 25% width */}
+        <div className="min-w-max">
+          <div className="text-right">
+            <span className="text-2xl font-bold text-green-700">
+              {filteredPlants.length}
+            </span>
+            <span className="block text-xs text-gray-500 -mt-1">
+              {filteredPlants.length === 1 ? "plant" : "plants"}
+            </span>
+          </div>
+        </div>
       </div>
 
       {filteredPlants.length === 0 ? (
@@ -200,6 +227,7 @@ export default function MyPlants() {
                 </button>
               </div>
 
+              {/* Image */}
               <div className="flex-shrink-0 w-full sm:w-48 h-40 sm:h-auto">
                 <img
                   src={plant.image || defaultPlantImg}
@@ -208,7 +236,7 @@ export default function MyPlants() {
                 />
               </div>
 
-              {/* Content */}
+              {/* Card Content */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-green-700 mb-1">
@@ -217,6 +245,8 @@ export default function MyPlants() {
                   <p className="text-gray-500 italic text-sm">
                     {plant.species}
                   </p>
+
+                  {/* Category */}
                   {plant.category && (
                     <div className="mt-2 inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
                       <Tag size={12} className="stroke-[2.5]" />
@@ -226,27 +256,17 @@ export default function MyPlants() {
 
                   {/* Location */}
                   {plant.location && (
-                    <p className="mt-1 text-sm flex items-center gap-1 text-gray-700">
-                      <MapPin size={14} className="text-green-600" />{" "}
+                    <p className="mt-2 text-sm flex items-center gap-1 text-gray-700">
+                      <MapPin size={14} className="text-green-600" />
                       {plant.location}
                     </p>
                   )}
 
                   {/* Next Watering */}
                   {plant.nextWatering && (
-                    <p className="mt-2 text-sm flex items-center gap-1 text-green-700 font-medium">
+                    <p className="mt-1 text-sm flex items-center gap-1 text-green-700 font-medium">
                       <Droplet size={14} /> Next Watering:{" "}
                       {plant.nextWatering.split("T")[0]}
-                    </p>
-                  )}
-
-                  {/* Last Watered */}
-                  {plant.lastWatered && (
-                    <p className="mt-1 text-sm flex items-center gap-1 text-blue-600 font-medium">
-                      <CalendarCheck size={14} /> Last Watered:{" "}
-                      {new Date(plant.lastWatered).toLocaleDateString("en-IN", {
-                        dateStyle: "medium",
-                      })}
                     </p>
                   )}
 
@@ -262,27 +282,12 @@ export default function MyPlants() {
                       <Sprout size={14} /> {plant.health}
                     </p>
                   )}
-
-                  {/* Notes */}
-                  {plant.notes && (
-                    <p className="mt-2 text-sm text-gray-600">{plant.notes}</p>
-                  )}
                 </div>
 
-                <div className="mt-3 space-y-1">
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   {plant.reminder && (
-                    <p className="flex items-center gap-1 text-sm text-indigo-600 font-medium">
-                      <Bell className="w-4 h-4" /> Reminder: {plant.reminder}
-                    </p>
-                  )}
-
-                  {plant.updatedAt && (
-                    <p className="text-xs text-gray-500 italic">
-                      Last updated:{" "}
-                      {new Date(plant.updatedAt).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
+                    <p className="flex items-center gap-1 text-sm text-indigo-500 font-medium">
+                      <Bell className="w-4 h-4" /> {plant.reminder}
                     </p>
                   )}
                 </div>

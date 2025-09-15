@@ -10,6 +10,7 @@ import {
   Heart,
   NotebookPen,
   Clock,
+  Tag,
   Pencil,
   Trash2,
   ArrowLeft,
@@ -92,6 +93,13 @@ export default function ViewPlant() {
             label="Location"
             value={plant.location}
           />
+          {plant.category && (
+            <InfoItem
+              icon={<Tag className="w-4 h-4" />}
+              label="Category"
+              value={plant.category}
+            />
+          )}
           <InfoItem
             icon={<Droplet className="w-4 h-4" />}
             label="Water Every"
@@ -116,11 +124,14 @@ export default function ViewPlant() {
             label="Health"
             value={plant.health}
           />
-          <InfoItem
-            icon={<Bell className="w-4 h-4" />}
-            label="Reminder"
-            value={plant.reminderEnabled ? plant.reminder : "Disabled"}
-          />
+
+          {plant.reminderEnabled && (
+            <InfoItem
+              icon={<Bell className="w-4 h-4" />}
+              label="Reminder"
+              value={plant.reminderEnabled ? "Enabled" : "Disabled"}
+            />
+          )}
         </div>
 
         {/* Notes */}

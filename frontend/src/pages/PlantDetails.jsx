@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import BackButton from "../components/BackButton";
 
 const PlantDetails = () => {
   const { id } = useParams();
@@ -90,12 +91,7 @@ const PlantDetails = () => {
         </div>
       )}
 
-      <Link
-        to="/explore"
-        className="inline-block mt-6 px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        ← Back to Plants
-      </Link>
+      <BackButton />
     </div>
   );
 };

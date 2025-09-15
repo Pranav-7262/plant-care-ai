@@ -3,6 +3,7 @@ import { fetchPlants } from "../api";
 import { motion } from "framer-motion";
 import { Heart, Sprout, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import BackButton from "./BackButton";
 
 export default function FavouritePlants() {
   const [plants, setPlants] = useState([]);
@@ -46,9 +47,12 @@ export default function FavouritePlants() {
 
   return (
     <div className="items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans">
-      <h1 className="text-3xl font-bold mb-6 text-green-800 flex items-center gap-2">
-        <Heart className="w-8 h-8 text-red-500" /> Favourite Plants
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-green-800 flex items-center gap-2">
+          <Heart className="w-8 h-8 text-red-500" /> Favourite Plants
+        </h1>
+        <BackButton />
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {plants.map((plant, index) => (
