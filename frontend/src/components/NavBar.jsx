@@ -66,6 +66,9 @@ const NavBar = () => {
           <NavLink to="/explore" className={navItemClass}>
             <Compass size={18} /> <span>Explore</span>
           </NavLink>
+          <NavLink to="/plantsdata" className={navItemClass}>
+            <Sprout size={18} /> <span>Plant Explore</span>
+          </NavLink>
           <NavLink to="/my-plants" className={navItemClass}>
             <Sprout size={18} /> <span>My Plants</span>
           </NavLink>

@@ -14,6 +14,8 @@ import ViewPlant from "./components/ViewPlant";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Settings from "./components/Settings";
+import PlantData from "./pages/PlantData";
+import PlantDataDetails from "./components/PlantDataDetails";
 
 function App() {
   return (
@@ -22,8 +24,10 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="chat" element={<Chat />} />
-          <Route path="explore" element={<Plants />} />
+          <Route path="/explore" element={<Plants />} />
           <Route path="/plants/:id" element={<PlantDetails />} />
+          <Route path="plantsdata" element={<PlantData />} />
+          <Route path="/plantsdata/:id" element={<PlantDataDetails />} />
           <Route path="add-plant" element={<AddPlant />} />
           <Route path="add-plant/:id" element={<AddPlant />} />
           <Route path="/view-plant/:id" element={<ViewPlant />} />
