@@ -26,7 +26,7 @@ function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="/explore" element={<Plants />} />
           <Route path="/plants/:id" element={<PlantDetails />} />
-          <Route path="plantsdata" element={<PlantData />} />
+          <Route path="/plantsdata" element={<PlantData />} />
           <Route path="/plantsdata/:id" element={<PlantDataDetails />} />
           <Route path="add-plant" element={<AddPlant />} />
           <Route path="add-plant/:id" element={<AddPlant />} />
