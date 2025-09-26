@@ -52,6 +52,7 @@ function App() {
         newestOnTop={true}
         pauseOnHover
         draggable
+        closeOnClick
         theme="dark"
         toastStyle={{
           backgroundColor: "#1f2937",

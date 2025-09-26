@@ -3,6 +3,8 @@ import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+// Import the event dispatcher from NavBar
+import { dispatchLoginEvent } from "../components/NavBar";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,8 +27,13 @@ export default function AuthPage() {
         ? { email: data.email, password: data.password }
         : data;
 
-      const res = await axios.post(endpoint, payload);
+      const res = await axios.post(endpoint, payload); // 1. Store user info
+
       localStorage.setItem("userInfo", JSON.stringify(res.data));
+
+      // 2. Dispatch event to notify the NavBar (and other components) of the change
+      dispatchLoginEvent();
+
       toast.success(`${isLogin ? "Login" : "Registration"} successful!`);
       navigate("/my-plants");
     } catch (err) {
@@ -40,28 +47,34 @@ export default function AuthPage() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-tr from-green-100 via-white to-green-200">
+      {" "}
       <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
+        {" "}
         <h1 className="text-3xl font-extrabold text-center text-green-700 mb-6 tracking-wide">
-          {isLogin ? "Welcome Back" : "Create Your Account"}
-        </h1>
-
+          {isLogin ? "Welcome Back" : "Create Your Account"}{" "}
+        </h1>{" "}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+          {" "}
           {!isLogin && (
             <div>
+                           {" "}
               <input
                 {...register("name", { required: "Name is required" })}
                 placeholder="Full Name"
                 className="w-full border p-3 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
               />
+                           {" "}
               {errors.name && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors.name.message}
+                                    {errors.name.message}               {" "}
                 </p>
               )}
+                         {" "}
             </div>
           )}
-
+                   {" "}
           <div>
+                       {" "}
             <input
               {...register("email", {
                 required: "Email is required",
@@ -73,14 +86,17 @@ export default function AuthPage() {
               placeholder="Email"
               className="w-full border p-3 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
             />
+                       {" "}
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
+                                {errors.email.message}             {" "}
               </p>
             )}
+                     {" "}
           </div>
-
+                   {" "}
           <div>
+                       {" "}
             <input
               type={showPassword ? "text" : "password"}
               {...register("password", {
@@ -94,54 +110,65 @@ export default function AuthPage() {
               placeholder="Password"
               className="w-full border p-3 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
             />
+                       {" "}
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
+                                {errors.password.message}             {" "}
               </p>
             )}
+                       {" "}
             <label className="inline-flex items-center mt-2 text-sm text-gray-600">
+                           {" "}
               <input
                 type="checkbox"
                 className="mr-2"
                 checked={showPassword}
                 onChange={() => setShowPassword(!showPassword)}
               />
-              Show Password
+                            Show Password            {" "}
             </label>
+                     {" "}
           </div>
-
+                   {" "}
           <button
             type="submit"
             className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-md font-semibold text-lg transition duration-200"
           >
-            {isLogin ? "Sign In" : "Register"}
+                        {isLogin ? "Sign In" : "Register"}         {" "}
           </button>
+                 {" "}
         </form>
-
+               {" "}
         <div className="text-center text-gray-600 mt-6 text-sm">
+                   {" "}
           {isLogin ? (
             <>
-              Don’t have an account?{" "}
+                            Don’t have an account?              {" "}
               <button
                 onClick={() => setIsLogin(false)}
                 className="text-green-600 font-medium hover:underline"
               >
-                Register
+                                Register              {" "}
               </button>
+                         {" "}
             </>
           ) : (
             <>
-              Already have an account?{" "}
+                            Already have an account?              {" "}
               <button
                 onClick={() => setIsLogin(true)}
                 className="text-green-600 font-medium hover:underline"
               >
-                Sign In
+                                Sign In              {" "}
               </button>
+                         {" "}
             </>
           )}
+                 {" "}
         </div>
+             {" "}
       </div>
+         {" "}
     </div>
   );
 }

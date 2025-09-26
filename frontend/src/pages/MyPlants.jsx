@@ -583,7 +583,6 @@ export default function MyPlants() {
                 <ChevronLeft className="w-5 h-5" />
               </button>
 
-              {/* Page Numbers */}
               {getPageNumbers().map((page) => (
                 <button
                   key={page}
@@ -597,8 +596,6 @@ export default function MyPlants() {
                   {page}
                 </button>
               ))}
-
-              {/* Next Button */}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
