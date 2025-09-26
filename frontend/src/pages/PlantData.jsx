@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PlantDataCard from "../components/PlantDataCard";
 import Spinner from "../components/Spinner";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const PlantData = () => {
   const [allPlantData, setAllPlantData] = useState([]);
@@ -16,6 +22,10 @@ const PlantData = () => {
     origins: [],
     climates: [],
   });
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const fetchData = async () => {
     const options = {
@@ -44,6 +54,7 @@ const PlantData = () => {
 
   useEffect(() => {
     let filtered = [...allPlantData];
+    setCurrentPage(1); // Reset to first page on filter/search change
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -90,6 +101,22 @@ const PlantData = () => {
     setFilteredPlantData(filtered);
   }, [searchTerm, allPlantData, activeFilters]);
 
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredPlantData.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(filteredPlantData.length / itemsPerPage);
+
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Remaining code is the same as before...
   const uniqueCategories = [
     ...new Set(allPlantData.map((item) => item.Categories).filter(Boolean)),
   ].sort();
@@ -146,7 +173,6 @@ const PlantData = () => {
           md:block
           `}
         >
-          {/* Backdrop (Mobile only) */}
           {filterOpen && (
             <div
               className="fixed inset-0 bg-black/40 z-40 md:hidden"
@@ -230,11 +256,45 @@ const PlantData = () => {
           {loading ? (
             <Spinner />
           ) : filteredPlantData.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 place-items-center">
-              {filteredPlantData.map((item) => (
-                <PlantDataCard key={item.id} data={item} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 place-items-center">
+                {currentItems.map((item) => (
+                  <PlantDataCard key={item.id} data={item} />
+                ))}
+              </div>
+              {/* Pagination Controls */}
+              {filteredPlantData.length > itemsPerPage && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  {[...Array(totalPages).keys()].map((page) => (
+                    <button
+                      key={page + 1}
+                      onClick={() => paginate(page + 1)}
+                      className={`w-10 h-10 rounded-full font-bold transition-all ${
+                        currentPage === page + 1
+                          ? "bg-[#3a684b] text-white shadow-lg"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {page + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-center text-lg text-gray-600 mt-10">
               No plants found matching your search. Try a different query or

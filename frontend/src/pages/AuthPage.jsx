@@ -2,11 +2,13 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -26,9 +28,7 @@ export default function AuthPage() {
       const res = await axios.post(endpoint, payload);
       localStorage.setItem("userInfo", JSON.stringify(res.data));
       toast.success(`${isLogin ? "Login" : "Registration"} successful!`);
-      setTimeout(() => {
-        window.location.href = "/my-plants";
-      }, 2000);
+      navigate("/my-plants");
     } catch (err) {
       const message =
         err.response?.data?.message ||

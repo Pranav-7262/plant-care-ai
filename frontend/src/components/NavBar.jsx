@@ -43,7 +43,7 @@ const NavBar = () => {
     }`;
 
   return (
-    <nav className="bg-[#2a4d3a] text-white py-3 flex items-center justify-between sticky top-0 w-full z-50 px-[4vw] lg:px-[12vw] shadow-2xl shadow-gray-950/50">
+    <nav className="bg-[#2a4d3a] text-white py-3 flex items-center justify-between sticky top-0 w-full z-50 px-4 md:px-8 lg:px-12 shadow-2xl shadow-gray-950/50">
       {/* Logo */}
       <div
         onClick={() => navigate("/")}
@@ -53,13 +53,13 @@ const NavBar = () => {
         <span className="hidden sm:inline font-montserrat">PlantBot</span>
       </div>
 
-      {/* Nav Links */}
+      {/* Nav Links Container */}
       <div
         className={`${
-          isOpen ? "block" : "hidden"
-        } absolute top-14 left-0 w-full bg-[#2a4d3a] md:static md:block md:w-auto md:bg-transparent transition-all duration-300 ease-in-out`}
+          isOpen ? "flex" : "hidden"
+        } absolute top-14 left-0 w-full bg-[#2a4d3a] md:static md:flex md:w-auto md:bg-transparent transition-all duration-300 ease-in-out flex-col md:flex-row items-center justify-center p-4 md:p-0`}
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-5 p-4 md:p-0">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-5 p-4 md:p-0 w-full md:w-auto">
           <NavLink to="/" className={navItemClass}>
             <Home size={18} /> <span>Home</span>
           </NavLink>
@@ -68,6 +68,7 @@ const NavBar = () => {
             <MessageCircle size={18} /> <span>Chat</span>
           </NavLink>
 
+          {/* Explore Dropdown */}
           <div
             className="relative"
             onMouseEnter={() => setExploreOpen(true)}
@@ -123,7 +124,7 @@ const NavBar = () => {
 
       {/* Mobile Toggle Button */}
       <button
-        className="ml-auto md:hidden text-white"
+        className="md:hidden text-white"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X size={26} /> : <Menu size={26} />}

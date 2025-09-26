@@ -67,14 +67,12 @@ export default function AddPlant() {
       if (id) {
         await updatePlant(id, form);
         toast.success("Plant updated successfully!");
+        navigate("/my-plants");
       } else {
         await addPlant(form);
         toast.success("Plant added successfully!");
-      }
-
-      setTimeout(() => {
         navigate("/my-plants");
-      }, 3500);
+      }
     } catch (err) {
       console.error("Save plant failed", err);
       toast.error("Failed to save plant");
@@ -85,190 +83,244 @@ export default function AddPlant() {
   };
 
   return (
-    <div className="items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans bg-gray-100">
-      <h2 className="text-2xl font-bold mb-6 text-green-700">
-        {id ? "✏️ Update Plant" : "🌱 Add a Plant"}
-      </h2>
+    // UPDATED CONTAINER: Applied your requested sizing/padding
+    <div className="flex justify-center items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans bg-amber-50 min-h-screen">
+      <div className="w-full max-w-4xl">
+        <header className="mb-8 text-center">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-800 tracking-tight">
+            {id ? "✏️ Update Your Green Buddy" : "🌿 Add a New Plant"}
+          </h1>
+          <p className="mt-2 text-xl text-emerald-700 font-medium">
+            Keep track of your precious greenery.
+          </p>
+        </header>
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+        {error && (
+          <div className="p-3 mb-6 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            <p>{error}</p>
+          </div>
+        )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white shadow-lg rounded-2xl p-6"
-      >
-        {/* Plant Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Plant Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-            placeholder="E.g. Tulsi"
-          />
-        </div>
-
-        {/* Species */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Species
-          </label>
-          <input
-            type="text"
-            name="species"
-            value={form.species}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-            placeholder="E.g. Ocimum tenuiflorum"
-          />
-        </div>
-
-        {/* 🌿 Category - NEW FIELD */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option value="">Select Category</option>
-            <option value="Indoor">Indoor</option>
-            <option value="Outdoor">Outdoor</option>
-            <option value="Flowering">Flowering</option>
-            <option value="Succulent">Succulent</option>
-            <option value="Herb">Herb</option>
-            <option value="Tree">Tree</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Location
-          </label>
-          <select
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option>Living Room</option>
-            <option>Bedroom</option>
-            <option>Balcony</option>
-            <option>Garden</option>
-            <option>Office</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Last Watered
-          </label>
-          <input
-            type="date"
-            name="lastWatered"
-            value={form.lastWatered}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Watering Frequency (days)
-          </label>
-          <input
-            type="number"
-            name="wateringFrequency"
-            value={form.wateringFrequency}
-            onChange={handleChange}
-            min={1}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Health
-          </label>
-          <select
-            name="health"
-            value={form.health}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-          >
-            <option>Healthy</option>
-            <option>Needs Attention</option>
-            <option>Sick</option>
-          </select>
-        </div>
-
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Notes
-          </label>
-          <textarea
-            name="notes"
-            value={form.notes}
-            onChange={handleChange}
-            maxLength={300}
-            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500"
-            placeholder="E.g. Sacred plant, needs sunlight"
-          />
-        </div>
-
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Image URL (optional)
-          </label>
-          <input
-            type="text"
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            className="w-full p-2 border rounded-lg mb-2 focus:ring-2 focus:ring-green-500"
-            placeholder="Enter image URL"
-          />
-          <img
-            src={form.image || defaultImage}
-            alt="Plant Preview"
-            className="w-32 h-32 object-cover rounded-md shadow"
-          />
-        </div>
-
-        <div className="col-span-2 flex items-center space-x-2">
-          <input
-            type="checkbox"
-            name="reminderEnabled"
-            checked={form.reminderEnabled}
-            onChange={handleChange}
-          />
-          <span>Enable watering reminders</span>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className={`col-span-2 py-2 rounded-lg text-white transition ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
-          }`}
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-2xl border border-gray-100"
         >
-          {loading ? "Saving..." : id ? "Update Plant" : "Add Plant"}
-        </button>
-      </form>
+          {/* Plant Name */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Plant Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
+              placeholder="E.g. Peace Lily"
+            />
+          </div>
+
+          {/* Species */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Species <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="species"
+              value={form.species}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
+              placeholder="E.g. Spathiphyllum wallisii"
+            />
+          </div>
+
+          {/* Category */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Category
+            </label>
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm bg-white appearance-none"
+            >
+              <option value="">Select Category</option>
+              <option value="Indoor">Indoor</option>
+              <option value="Outdoor">Outdoor</option>
+              <option value="Flowering">Flowering</option>
+              <option value="Succulent">Succulent</option>
+              <option value="Herb">Herb</option>
+              <option value="Tree">Tree</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Location */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Location
+            </label>
+            <select
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm bg-white appearance-none"
+            >
+              <option value="Living Room">Living Room</option>
+              <option value="Bedroom">Bedroom</option>
+              <option value="Balcony">Balcony</option>
+              <option value="Garden">Garden</option>
+              <option value="Office">Office</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Last Watered */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Last Watered <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              name="lastWatered"
+              value={form.lastWatered}
+              onChange={handleChange}
+              required
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm bg-white"
+            />
+          </div>
+
+          {/* Watering Frequency (days) */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Watering Frequency (days)
+            </label>
+            <input
+              type="number"
+              name="wateringFrequency"
+              value={form.wateringFrequency}
+              onChange={handleChange}
+              min={1}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
+              placeholder="E.g. 7"
+            />
+          </div>
+
+          {/* Health */}
+          <div className="space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Health Status
+            </label>
+            <select
+              name="health"
+              value={form.health}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm bg-white appearance-none"
+            >
+              <option value="Healthy">💚 Healthy</option>
+              <option value="Needs Attention">💛 Needs Attention</option>
+              <option value="Sick">💔 Sick</option>
+            </select>
+          </div>
+
+          {/* Reminder Checkbox */}
+          <div className="flex items-center space-x-3 mt-4">
+            <input
+              type="checkbox"
+              id="reminderEnabled"
+              name="reminderEnabled"
+              checked={form.reminderEnabled}
+              onChange={handleChange}
+              className="h-5 w-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+            />
+            <label
+              htmlFor="reminderEnabled"
+              className="text-base font-semibold text-gray-700"
+            >
+              Enable watering reminders
+            </label>
+          </div>
+
+          {/* Notes (Full Width) */}
+          <div className="md:col-span-2 space-y-1">
+            <label className="block text-base font-semibold text-gray-700">
+              Notes (Max 300 chars)
+            </label>
+            <textarea
+              name="notes"
+              value={form.notes}
+              onChange={handleChange}
+              maxLength={300}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
+              placeholder="E.g. Sacred plant, needs bright, indirect sunlight. Repotted last month."
+            />
+          </div>
+
+          {/* Image URL & Preview (Full Width) */}
+          <div className="md:col-span-2 space-y-2">
+            <label className="block text-base font-semibold text-gray-700">
+              Image URL (optional)
+            </label>
+            <input
+              type="text"
+              name="image"
+              value={form.image}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
+              placeholder="Enter image URL"
+            />
+            <div className="pt-2">
+              <img
+                src={form.image || defaultImage}
+                alt="Plant Preview"
+                className="w-32 h-32 object-cover rounded-full shadow-lg border-4 border-white"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button (Full Width) */}
+          <button
+            type="submit"
+            disabled={loading}
+            className={`md:col-span-2 mt-4 w-full py-3 rounded-xl text-lg font-bold transition duration-300 ease-in-out transform ${
+              loading
+                ? "bg-gray-400 text-gray-100 cursor-not-allowed"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg hover:shadow-xl active:scale-[0.99]"
+            }`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Saving...
+              </span>
+            ) : id ? (
+              "Update Plant"
+            ) : (
+              "Add Plant to Collection"
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
