@@ -92,8 +92,13 @@ export default function MyPlants() {
       setLoading(false);
     }
     // Reset to page 1 whenever search/filters change in the effect
-    setCurrentPage(1);
+    // NOTE: This effect runs only on mount, but resetting the page here is fine.
   }, []);
+
+  // Effect to reset page when search or filters change outside of the initial mount
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filters]);
 
   // --- FILTERING LOGIC ---
   const filteredPlants = useMemo(() => {
@@ -120,7 +125,8 @@ export default function MyPlants() {
         favouriteMatch
       );
     });
-    // Ensure the page number is valid after filtering
+    // The pagination logic for setting the correct page after filtering is now
+    // handled within the useMemo to ensure it runs *before* slice.
     const totalPages = Math.ceil(list.length / ITEMS_PER_PAGE);
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
@@ -128,7 +134,7 @@ export default function MyPlants() {
       setCurrentPage(1);
     }
     return list;
-  }, [plants, search, filters, currentPage]);
+  }, [plants, search, filters]); // Removed currentPage from dependency array to prevent infinite loop
 
   // --- PAGINATION LOGIC ---
   const totalPages = Math.ceil(filteredPlants.length / ITEMS_PER_PAGE);
@@ -162,7 +168,6 @@ export default function MyPlants() {
     return pages;
   };
 
-  // ... (handleDelete, handleFavourite, handleView, handleFilterChange, handleClearFilters remain the same) ...
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this plant?")) return;
 
@@ -175,8 +180,8 @@ export default function MyPlants() {
       toast.error("❌ Failed to delete plant");
     }
   };
+
   const handleFavourite = async (plantId) => {
-    // Optimistic update
     setPlants((prevPlants) =>
       prevPlants.map((p) =>
         p._id === plantId ? { ...p, favourite: !p.favourite } : p
@@ -209,7 +214,7 @@ export default function MyPlants() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    setCurrentPage(1); // Reset page on filter change
+    // Removed setCurrentPage(1) here as it's now handled by the useEffect above
   };
 
   const handleClearFilters = () => {
@@ -219,7 +224,7 @@ export default function MyPlants() {
       category: "",
       showFavourites: false,
     });
-    setCurrentPage(1); // Reset page on filter change
+    // Removed setCurrentPage(1) here as it's now handled by the useEffect above
   };
 
   // --- Render Conditionals ---
@@ -229,8 +234,6 @@ export default function MyPlants() {
     return (
       <p className="text-center text-red-600 font-semibold mt-10">{error}</p>
     );
-
-  // --- JSX Rendering ---
   return (
     <div className="min-h-screen bg-gray-50 items-center px-[3vw] md:px-[3vw] lg:px-[10vw] py-[9vh] font-sans">
       {/* HEADER SECTION (Centered and Modern) */}
@@ -247,8 +250,6 @@ export default function MyPlants() {
 
         <div className="max-w-xl h-1 bg-emerald-500 rounded-full mt-4 mx-auto" />
       </div>
-
-      {/* SEARCH AND FILTER SECTION */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center mb-10 gap-4">
         {/* Search Input */}
         <div className="relative flex-grow">
@@ -282,8 +283,6 @@ export default function MyPlants() {
             </span>
           )}
         </button>
-
-        {/* Total plants count */}
         <div className="min-w-max text-right self-end sm:self-center">
           <span className="text-3xl font-extrabold text-emerald-700">
             {filteredPlants.length}
@@ -448,7 +447,6 @@ export default function MyPlants() {
                 }}
                 className="relative group flex flex-col bg-white rounded-2xl shadow-xl border border-gray-100 transition-all overflow-hidden"
               >
-                {/* Image with Aspect Ratio */}
                 <div className="w-full h-48 overflow-hidden">
                   <img
                     src={plant.image || defaultPlantImg}
@@ -456,15 +454,13 @@ export default function MyPlants() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-
-                {/* Card Content */}
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start">
                       <h2 className="text-2xl font-bold text-emerald-800 mb-1 leading-tight">
                         {plant.name}
                       </h2>
-                      {/* Favourite badge */}
+                      {/* Favourite badge (visual indicator only, kept for quick glance) */}
                       {plant.favourite && (
                         <Heart
                           className="w-6 h-6 text-red-500 fill-red-500 flex-shrink-0"
@@ -493,8 +489,6 @@ export default function MyPlants() {
                           </p>
                         )}
                       </div>
-
-                      {/* Health Status */}
                       <p
                         className={`text-sm font-semibold flex items-center gap-1 ${
                           plant.health === "Healthy"
@@ -506,16 +500,12 @@ export default function MyPlants() {
                       >
                         <Sprout size={14} /> Health: {plant.health}
                       </p>
-
-                      {/* Smart Reminder (Re-added with modern style) */}
                       {plant.reminder && (
                         <p className="text-sm flex items-center gap-1 font-medium text-indigo-600 p-2 bg-indigo-50 rounded-lg border border-indigo-200">
                           <Bell size={16} className="text-indigo-500" />{" "}
                           Reminder: {plant.reminder}
                         </p>
                       )}
-
-                      {/* Next Watering */}
                       {plant.nextWatering && (
                         <p className="text-sm flex items-center gap-1 text-sky-600">
                           <Droplet size={14} /> Needs water on:{" "}
@@ -538,8 +528,23 @@ export default function MyPlants() {
                       <Eye className="w-4 h-4" /> View Details
                     </button>
 
-                    {/* Secondary Actions */}
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => handleFavourite(plant._id)}
+                        className={`p-2 rounded-full transition ${
+                          plant.favourite
+                            ? "text-red-500 hover:bg-red-100 fill-red-500"
+                            : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                        }`}
+                        title={
+                          plant.favourite
+                            ? "Remove from Favourites"
+                            : "Add to Favourites"
+                        }
+                      >
+                        <Heart className="w-4 h-4" />
+                      </button>
+
                       {/* Edit */}
                       <button
                         onClick={() => navigate(`/add-plant/${plant._id}`)}

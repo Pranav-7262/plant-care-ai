@@ -122,7 +122,6 @@ const Plants = () => {
               </button>
             </div>
 
-            {/* Search Bar within the filter column */}
             <div className="mb-6">
               <div className="relative">
                 <input
