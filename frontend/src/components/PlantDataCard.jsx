@@ -8,28 +8,36 @@ const PlantDataCard = ({ data }) => {
 
   return (
     <div
-      className="group max-w-sm rounded-xl overflow-hidden shadow-lg hover:shadow-2xl bg-white
-                    transition-all duration-300 ease-in-out hover:scale-105 cursor-pointer border border-gray-100"
+      className="group flex flex-col h-full rounded-2xl overflow-hidden 
+                 shadow-md hover:shadow-xl bg-white border border-gray-100 
+                 transition-all duration-300 ease-in-out hover:scale-[1.02]"
     >
+      {/* Image */}
       <img
-        className="w-full h-56 object-cover rounded-t-xl
+        className="w-full h-56 object-cover rounded-t-2xl 
                    transition-all duration-300 ease-in-out group-hover:brightness-105"
-        src={imageUrl || "https://via.placeholder.com/400x300?text=No+Image"} // Fallback image
+        src={imageUrl}
         alt={commonName || latinName || "Plant image"}
       />
-      <div className="px-6 py-4">
-        <div className="font-extrabold text-xl md:text-2xl mb-2 text-[#1a382e]">
+
+      {/* Card Body */}
+      <div className="flex flex-col flex-1 p-5">
+        {/* Plant Name */}
+        <h2 className="font-extrabold text-lg md:text-xl text-[#1a382e] mb-2 line-clamp-2">
           {commonName || "Unknown Plant"}
-        </div>
-        <p className="text-gray-600 text-base italic mb-3">
+        </h2>
+
+        {/* Latin Name */}
+        <p className="text-gray-600 text-base italic mb-4 line-clamp-1">
           {latinName || "No scientific name available"}
         </p>
 
+        {/* View Details Button (pushed to bottom) */}
         <Link
           to={`/plantsdata/${id}`}
-          className="inline-block mt-4 px-5 py-2 bg-[#3a684b] text-white text-base font-semibold
+          className="mt-auto inline-block px-5 py-2 bg-[#3a684b] text-white text-sm md:text-base font-semibold
                      rounded-full shadow-md hover:shadow-lg hover:bg-[#2a4d3a]
-                     transition-all duration-300 ease-in-out"
+                     transition-all duration-300 ease-in-out text-center"
         >
           View Details
         </Link>

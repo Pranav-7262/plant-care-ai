@@ -26,7 +26,7 @@ export const addPlant = asyncHandler(async (req, res) => {
     category,
   } = req.body;
 
-  if (!name || !species) {
+  if (!name) {
     res.status(400);
     throw new Error("Please provide both name and species");
   }

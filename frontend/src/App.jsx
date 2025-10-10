@@ -7,6 +7,7 @@ import Plants from "./pages/Plants";
 import PlantDetails from "./pages/PlantDetails";
 import MyPlants from "./pages/MyPlants";
 import FavouritePlants from "./components/FavouritePlants";
+import Docs from "./pages/Docs";
 
 import AuthPage from "./pages/AuthPage";
 import AddPlant from "./pages/AddPlant";
@@ -23,6 +24,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="/docs" element={<Docs />} />
           <Route path="chat" element={<Chat />} />
           <Route path="/explore" element={<Plants />} />
           <Route path="/plants/:id" element={<PlantDetails />} />

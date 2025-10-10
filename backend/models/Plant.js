@@ -15,8 +15,8 @@ const plantSchema = new mongoose.Schema(
     },
     species: {
       type: String,
-      required: [true, "Species is required"],
       trim: true,
+      required: false,
     },
     location: {
       type: String,
@@ -72,7 +72,7 @@ const plantSchema = new mongoose.Schema(
     },
     favourite: {
       type: Boolean,
-      default: false, // toggle when user clicks ❤️ icon
+      default: false,
     },
   },
   { timestamps: true }

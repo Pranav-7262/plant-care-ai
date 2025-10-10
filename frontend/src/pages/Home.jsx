@@ -4,7 +4,7 @@ import Tilt from "react-parallax-tilt";
 import { TypeAnimation } from "react-type-animation";
 import Features from "./Features";
 import TestimonialsSection from "../components/TestimonialsSection"; // Import the new component
-import { Sprout } from "lucide-react"; // Importing an icon for the brand
+import { Sprout, Bot } from "lucide-react"; // Importing an icon for the brand
 
 import plant from "../assets/plant.jpg";
 
@@ -20,7 +20,7 @@ const Home = () => {
           </p>
 
           <h1 className="text-6xl md:text-7xl font-extrabold text-gray-900 leading-tight drop-shadow-sm">
-            PlantBot
+            PlantCareAI
           </h1>
 
           {/* Animated Typing Subheading */}
@@ -43,14 +43,54 @@ const Home = () => {
           </div>
 
           <p className="text-gray-600 text-lg leading-relaxed max-w-xl mx-auto md:mx-0">
-            Track your plants, get **AI-powered gardening advice**, and chat
-            anytime for support. With secure login, a sleek dashboard, and smart
+            Track your plants, get AI-powered gardening advice, and chat anytime
+            for support. With secure login, a sleek dashboard, and smart
             insights — PlantBot is your green thumb's best friend.
           </p>
 
-          <Link to="/features">
-            <button className="mt-8 inline-flex items-center px-10 py-3 bg-emerald-600 text-white text-xl font-bold rounded-xl shadow-lg shadow-emerald-300 transition duration-300 ease-in-out hover:bg-emerald-700 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-emerald-500">
-              Get Started Now
+          <Link to="/chat">
+            <button
+              className="
+        mt-8 
+        inline-flex 
+        items-center 
+        justify-center /* Center content */
+        gap-3 /* Space between icon and text */
+        px-10 
+        py-3 
+        text-white 
+        text-xl 
+        font-bold 
+        rounded-xl 
+        transition 
+        duration-300 
+        ease-in-out 
+        shadow-2xl 
+        
+        /* Modern Gradient & Colors */
+        bg-gradient-to-r from-emerald-600 to-green-600 
+        shadow-green-500/50 
+        
+        /* Hover Effects: Lift and Scale */
+        hover:from-emerald-700 
+        hover:to-green-700 
+        hover:scale-[1.05] 
+        hover:-translate-y-1 /* Lifts slightly on hover */
+        
+        /* Focus/Active Effects: Push Down */
+        focus:outline-none 
+        focus:ring-4 
+        focus:ring-offset-2 
+        focus:ring-green-400 
+        active:scale-[0.98] 
+        active:translate-y-[0px] /* Settles back down */
+        active:shadow-lg 
+    "
+            >
+              {/* Plant icon */}
+              <Bot size={24} className="animate-pulse-slow" />{" "}
+              {/* Example icon, add pulse for extra flair */}
+              Chat with PlantBot
             </button>
           </Link>
         </div>

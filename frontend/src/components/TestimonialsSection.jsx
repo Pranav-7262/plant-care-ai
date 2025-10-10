@@ -99,7 +99,7 @@ const TestimonialCard = ({ testimonial, index }) => {
 const TestimonialsSection = () => {
   return (
     <section className="py-24 bg-gray-50 font-sans">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header - kept centered, added padding back here */}
         <div className="text-center mb-16 px-6 lg:px-8">
           <motion.h2

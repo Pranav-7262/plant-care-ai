@@ -1,235 +1,404 @@
 import { useEffect, useRef, useState } from "react";
-import { API_URL } from "../../ai-helper/constants";
-import QuestionAnswer from "../../ai-components/QuestionAnswer";
-import RecentSearch from "../../ai-components/RecentSearch";
+import { API_URL } from "../ai-helper/constants.js";
+import { QuestionAnswer } from "../components/ai_components/QuestionAnswer.jsx";
+import { RecentSearch } from "../components/ai_components/RecentSearch.jsx";
+import { SuggestionButton } from "../components/ai_components/SuggestionButton.jsx";
+const HISTORY_KEY = `plant_ai_history_v2`;
 
-function App() {
-  const [question, setQuestion] = useState("");
-  const [result, setResult] = useState([]);
-  const [recentHistory, setRecentHistory] = useState(
-    JSON.parse(localStorage.getItem("history")) || []
-  );
-  const [selectedHistory, setSelectedHistory] = useState("");
-  const scrollToAns = useRef();
-  const [loader, setLoader] = useState(false);
+const MAX_RETRIES = 5;
 
-  const askQuestion = async () => {
-    if (!question && !selectedHistory) return;
-
-    // --- Save question to history ---
-    if (question) {
-      let history = JSON.parse(localStorage.getItem("history")) || [];
-      history = history.slice(0, 19);
-      history = [question, ...history];
-      history = history.map(
-        (item) => item.charAt(0).toUpperCase() + item.slice(1).trim()
-      );
-      history = [...new Set(history)];
-      localStorage.setItem("history", JSON.stringify(history));
-      setRecentHistory(history);
-    }
-
-    const payloadData = question ? question : selectedHistory;
-    const payload = {
-      contents: [{ parts: [{ text: payloadData }] }],
-    };
-
-    setLoader(true);
-
+async function safeFetchGeminiResponse(apiUrl, payload) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      let res = await fetch(API_URL, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("API Error:", res.status, errorText);
-
-        let fallbackMsg =
-          res.status === 429
-            ? "⚠️ Too many requests. Please wait and try again."
-            : "❌ Failed to fetch response from AI.";
-
-        setResult((prev) => [
-          ...prev,
-          { type: "q", text: payloadData },
-          { type: "a", text: [fallbackMsg] },
-        ]);
-        setLoader(false);
-        setQuestion("");
-        return;
+      if (!response.ok && response.status < 500) {
+        const errorBody = await response.json();
+        throw new Error(
+          `API Request Failed with Status ${response.status}: ${errorBody.error.message}`
+        );
       }
 
-      let response = await res.json();
+      if (response.ok) {
+        return await response.json();
+      }
+
+      if (response.status >= 500) {
+        if (attempt === MAX_RETRIES - 1) {
+          const errorBody = await response.json();
+          throw new Error(
+            `Gemini API call failed after ${MAX_RETRIES} retries. Last error: ${errorBody.error.message}`
+          );
+        }
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+  throw new Error("Failed to get response after maximum retries.");
+}
+
+<QuestionAnswer />;
+<RecentSearch />;
+<SuggestionButton />;
+function App() {
+  const [questionInput, setQuestionInput] = useState("");
+  const [result, setResult] = useState([]);
+  // Recent History now stores objects {id, query, timestamp}
+  const [recentHistory, setRecentHistory] = useState([]);
+  const [selectedHistory, setSelectedHistory] = useState("");
+  const [loader, setLoader] = useState(false);
+  const [currentSuggestions, setCurrentSuggestions] = useState([]);
+  const scrollToAns = useRef();
+
+  const fixedPrefix = "Can you share some plant information about ";
+  const getHistory = () => {
+    try {
+      const storedHistory = localStorage.getItem(HISTORY_KEY);
+      return storedHistory ? JSON.parse(storedHistory) : [];
+    } catch (e) {
+      console.error("Error loading history from localStorage:", e);
+      return [];
+    }
+  };
+  const updateHistory = (prompt) => {
+    // Clean up the prompt before saving (remove fixed prefix)
+    const historyEntry = prompt.startsWith(fixedPrefix)
+      ? prompt.substring(fixedPrefix.length).trim()
+      : prompt;
+
+    const newEntry = {
+      // Capitalize first letter of the saved query
+      query:
+        historyEntry.charAt(0).toUpperCase() + historyEntry.slice(1).trim(),
+      id: crypto.randomUUID(), // Use a UUID for a unique key
+      timestamp: Date.now(),
+    };
+
+    setRecentHistory((prevHistory) => {
+      // Add new entry to the beginning, limit to 20
+      const updatedHistory = [newEntry, ...prevHistory.slice(0, 19)];
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+      } catch (e) {
+        console.error("Error saving history to localStorage:", e);
+      }
+      return updatedHistory;
+    });
+  };
+
+  const handleClearHistory = () => {
+    setRecentHistory([]);
+    localStorage.removeItem(HISTORY_KEY);
+  };
+  const handleDeleteHistoryItem = (id) => {
+    setRecentHistory((prevHistory) => {
+      // Filter out the item with the matching ID
+      const updatedHistory = prevHistory.filter((item) => item.id !== id);
+      try {
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
+      } catch (e) {
+        console.error(
+          "Error saving history to localStorage after deletion:",
+          e
+        );
+      }
+      return updatedHistory;
+    });
+  };
+
+  useEffect(() => {
+    setRecentHistory(getHistory());
+  }, []); // Run only once on mount
+
+  // Helper function to generate dummy suggestions based on the last question (prompt)
+  const generateSuggestions = (prompt) => {
+    const topic = prompt.toLowerCase().includes("monstera")
+      ? "monstera"
+      : prompt.toLowerCase().includes("succulent")
+      ? "succulents"
+      : prompt.toLowerCase().includes("ficus")
+      ? "ficus"
+      : "general";
+
+    switch (topic) {
+      case "monstera":
+        return [
+          "How often should I water my Monstera?",
+          "What kind of fertilizer is best for Monstera?",
+          "Why are the leaves turning yellow?",
+        ];
+      case "succulents":
+        return [
+          "What is the ideal soil mix for succulents?",
+          "How much light do desert succulents need?",
+          "How do I propagate a new succulent?",
+        ];
+      case "ficus":
+        return [
+          "How do I stop my Ficus from dropping leaves?",
+          "What temperature range is safe for a Ficus?",
+          "Does a Ficus need misting?",
+        ];
+      default:
+        return [
+          "What are the best low-light houseplants?",
+          "How to check if soil is well-draining?",
+          "Tell me about composting.",
+        ];
+    }
+  };
+
+  const askQuestion = async (prompt) => {
+    setSelectedHistory("");
+    setCurrentSuggestions([]);
+
+    // Save question to LocalStorage first
+    if (prompt) {
+      updateHistory(prompt);
+    }
+
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      systemInstruction: {
+        parts: [
+          {
+            text: "You are 'Plant AI', a helpful and friendly expert on plant care, identification, and general botany. Respond concisely using bullet points when appropriate.",
+          },
+        ],
+      },
+    };
+
+    setResult((prev) => [...prev, { type: "q", text: [prompt] }]);
+
+    setLoader(true);
+    setQuestionInput("");
+
+    try {
+      let response = await safeFetchGeminiResponse(API_URL, payload);
 
       if (!response.candidates || !response.candidates[0]) {
         console.error("Unexpected response:", response);
+        // Display an error message to the user
         setResult((prev) => [
-          ...prev,
-          { type: "q", text: payloadData },
+          ...prev.slice(0, -1), // Remove the question added above
+          { type: "q", text: [prompt] },
           {
             type: "a",
-            text: ["🤔 No valid answer received. Try again later."],
+            text: [
+              "🤔 No valid answer received from the AI. Try rephrasing your question.",
+            ],
           },
         ]);
-        setLoader(false);
-        setQuestion("");
         return;
       }
 
       let dataString = response.candidates[0].content.parts[0].text || "";
-      dataString = dataString.split("* ").map((item) => item.trim());
+      dataString = dataString
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
 
       setResult((prev) => [
-        ...prev,
-        { type: "q", text: payloadData },
-        { type: "a", text: dataString },
+        ...prev.slice(0, -1), // Remove the question added above
+        { type: "q", text: [prompt] },
+        {
+          type: "a",
+          text:
+            dataString.length > 0
+              ? dataString
+              : ["Got an empty response. Try a different question."],
+        },
       ]);
+      setCurrentSuggestions(generateSuggestions(prompt));
 
-      setQuestion("");
-
+      // Scroll to the new answer
       setTimeout(() => {
         if (scrollToAns.current) {
           scrollToAns.current.scrollTop = scrollToAns.current.scrollHeight;
         }
       }, 500);
     } catch (err) {
-      console.error("Fetch failed:", err);
+      console.error("Fatal API request failed:", err);
+
+      const is403Error =
+        err.message.includes("Status 403") &&
+        err.message.includes("unregistered callers");
+
+      // Replace the question with a helpful error answer
       setResult((prev) => [
-        ...prev,
-        { type: "q", text: payloadData },
-        { type: "a", text: ["🚨 Network error. Please try again."] },
+        ...prev.slice(0, -1), // Remove the question added above
+        { type: "q", text: [prompt] },
+        {
+          type: "a",
+          text: [
+            is403Error
+              ? `🚨 **API Error (403)**: The connection to the AI failed because the **API key is missing or invalid** in the request URL. This is an environment configuration issue.`
+              : `🚨 AI Request Failed: ${err.message}. Please try again later.`,
+          ],
+        },
       ]);
+
+      // Clear suggestions on error
+      setCurrentSuggestions([]);
     } finally {
       setLoader(false);
     }
   };
 
-  const isEnter = (event) => {
-    if (event.key === "Enter") {
-      askQuestion();
-    }
-  };
-
   useEffect(() => {
-    if (selectedHistory) askQuestion();
+    // If a history item is clicked, trigger the question
+    if (selectedHistory) {
+      askQuestion(selectedHistory);
+    }
   }, [selectedHistory]);
 
-  const fixedPrefix = "Can you share some plant information about ";
-
   const handleChange = (e) => {
-    setQuestion(e.target.value);
+    setQuestionInput(e.target.value);
   };
 
   const handleAsk = () => {
-    if (question.trim()) {
-      askQuestion(fixedPrefix + question.trim());
-      setQuestion(fixedPrefix + question.trim());
-
-      setQuestion(""); // Clear input after asking
+    if (questionInput.trim()) {
+      const fullQuestion = fixedPrefix + questionInput.trim();
+      askQuestion(fullQuestion);
     }
   };
 
+  const handleSuggestionClick = (suggestion) => {
+    setQuestionInput(suggestion);
+    askQuestion(suggestion);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="grid grid-cols-1 md:grid-cols-5 min-h-screen bg-gray-50 font-sans">
+      {/* ===== Sidebar (static) ===== */}
       <RecentSearch
         recentHistory={recentHistory}
-        setRecentHistory={setRecentHistory}
         setSelectedHistory={setSelectedHistory}
+        handleClearHistory={handleClearHistory}
+        handleDeleteHistoryItem={handleDeleteHistoryItem}
       />
 
-      {/* Main Chat Area */}
-      <div className="col-span-4 p-6 md:p-12 flex flex-col gap-6">
-        {/* Title */}
-        <div className="space-y-2 text-center md:text-left">
-          <h2 className="text-center mt-6 text-xl md:text-2xl font-normal text-gray-700">
-            <span className="font-extrabold text-green-700 text-2xl md:text-3xl tracking-wide font-serif">
-              Ask
-            </span>{" "}
-            anything about plants{" "}
-            <span className="inline-block animate-bounce">🌿</span>
-          </h2>
-        </div>
-
-        {/* Loader */}
-        {loader && (
-          <div role="status" className="flex justify-center my-4">
-            <svg
-              aria-hidden="true"
-              className="w-8 h-8 text-gray-200 animate-spin fill-green-500"
-              viewBox="0 0 100 101"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M100 50.5908C100 78.2051 
-               77.6142 100.591 50 100.591C22.3858 100.591 
-               0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 
-               50 0.59082C77.6142 0.59082 100 22.9766 
-               100 50.5908Z"
-                fill="currentColor"
-              />
-              <path
-                d="M93.9676 39.0409C96.393 38.4038 
-               97.8624 35.9116 97.0079 33.5539C95.2932 
-               28.8227 92.871 24.3692 89.8167 20.348C85.8452 
-               15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 
-               4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 
-               0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 
-               1.69328 37.813 4.19778 38.4501 6.62326C39.0873 
-               9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 
-               9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 
-               10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 
-               17.9648 79.3347 21.5619 82.5849 25.841C84.9175 
-               28.9121 86.7997 32.2913 88.1811 35.8758C89.083 
-               38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                fill="currentFill"
-              />
-            </svg>
-            <span className="sr-only">Loading...</span>
+      {/* ===== Main Chat Area ===== */}
+      <div className="col-span-4 flex flex-col h-screen">
+        {/* Fixed Title Section */}
+        <div className="sticky top-0 z-20 bg-gray-50 pt-7 pb-3 border-b border-green-100">
+          <div className="space-y-1 text-center">
+            <h2 className="text-center text-xl text-gray-700">
+              <span className="font-extrabold text-green-700 text-3xl md:text-4xl tracking-wide font-inter">
+                Plant
+              </span>
+              <span className="font-semibold text-gray-800 text-3xl md:text-4xl tracking-wide ml-2">
+                Bot
+              </span>
+              <span className="inline-block ml-3 text-2xl md:text-3xl animate-bounce">
+                🌿
+              </span>
+            </h2>
           </div>
-        )}
-
-        {/* Answer List */}
-        <div
-          ref={scrollToAns}
-          className="flex-1 overflow-y-auto rounded-xl bg-white shadow-md p-6 border border-gray-200 max-h-[450px]"
-        >
-          <ul className="space-y-5">
-            {result.map((item, index) => (
-              <QuestionAnswer key={index} item={item} index={index} />
-            ))}
-          </ul>
         </div>
 
-        {/* Input Box */}
-
-        <div className="w-full max-w-2xl mx-auto flex items-center gap-3 bg-white border border-gray-200 rounded-full shadow-sm px-5 py-3">
-          <span className="text-gray-700 whitespace-nowrap text-base md:text-lg">
-            {fixedPrefix}
-          </span>
-
-          <input
-            value={question}
-            onChange={handleChange}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleAsk();
-              }
-            }}
-            className="flex-1 text-black text-base md:text-lg bg-transparent focus:outline-none"
-            type="text"
-            placeholder="Enter plant name..."
-          />
-
-          <button
-            onClick={handleAsk}
-            className="text-white bg-green-600 hover:bg-green-700 transition px-5 py-2 rounded-full text-sm md:text-base font-semibold"
+        {/* ===== Scrollable Section (between title & input) ===== */}
+        <div className="flex-1 overflow-y-auto px-8 md:px-12 py-8 space-y-8">
+          {/* Answer List Container - Increased min-height to 500px */}
+          <div
+            ref={scrollToAns}
+            className="rounded-2xl bg-white shadow-2xl shadow-green-100/50 p-6 border-2 border-green-200/50 min-h-[500px]"
           >
-            Ask
-          </button>
+            <ul className="space-y-8">
+              {/* Welcome Message - Only shows if result array is empty */}
+              {result.length === 0 && (
+                <li className="flex flex-col items-start">
+                  <div className="p-4 max-w-lg rounded-xl text-sm md:text-base bg-white text-gray-700 shadow-xl border border-gray-200">
+                    <strong className="font-semibold text-green-700 text-lg">
+                      👋 Welcome to Plant Bot!
+                    </strong>
+                    <p className="mt-2 text-gray-600">
+                      I'm here to help you with your gardening questions. Try
+                      asking about the care of a specific plant, like "monstera"
+                      or "how often to water succulents."
+                    </p>
+                  </div>
+                </li>
+              )}
+
+              {/* Map through existing Question/Answer results */}
+              {result.map((item, index) => (
+                <QuestionAnswer key={index} item={item} />
+              ))}
+            </ul>
+          </div>
+
+          {/* Suggestion Bar - Adjusted spacing/padding for clarity */}
+          {currentSuggestions.length > 0 && !loader && (
+            <div className="w-full max-w-2xl mx-auto flex flex-wrap gap-2 justify-center p-3 mt-4 border-t border-gray-100 pt-4">
+              <span className="text-gray-600 text-sm font-semibold pr-1 pt-1 hidden sm:inline">
+                Quick Questions:
+              </span>
+              {currentSuggestions.map((suggestion, index) => (
+                <SuggestionButton
+                  key={index}
+                  text={suggestion}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Loader - Replaced complex SVG with clean, functional Tailwind spinner */}
+          {loader && (
+            <div
+              role="status"
+              className="flex justify-center items-center mt-6"
+            >
+              <div
+                className="w-8 h-8 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"
+                aria-label="Loading response"
+              ></div>
+              <span className="sr-only">Loading...</span>
+            </div>
+          )}
+        </div>
+
+        {/* ===== Fixed Input Box ===== */}
+        <div className="sticky bottom-0 z-20 bg-gray-50 pt-4 pb-6 border-t border-green-100">
+          <div className="w-full max-w-2xl mx-auto flex items-center gap-3 bg-white border border-green-200 rounded-full shadow-2xl shadow-green-100/50 px-6 py-4">
+            <span className="text-gray-700 whitespace-nowrap text-base md:text-lg hidden sm:inline">
+              {fixedPrefix}
+            </span>
+            <span className="text-gray-700 whitespace-nowrap text-base md:text-lg sm:hidden">
+              {fixedPrefix.split(" ")[0]}...
+            </span>
+
+            <input
+              value={questionInput}
+              onChange={handleChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAsk();
+              }}
+              className="flex-1 text-black text-base md:text-lg bg-transparent focus:outline-none"
+              type="text"
+              placeholder="Enter about your plants........"
+              disabled={loader}
+            />
+
+            <button
+              onClick={handleAsk}
+              className={`text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800 transition px-5 py-2 rounded-full text-base font-semibold shadow-lg shadow-green-400/50 ${
+                loader ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loader}
+            >
+              Ask
+            </button>
+          </div>
         </div>
       </div>
     </div>

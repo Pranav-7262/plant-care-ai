@@ -21,7 +21,7 @@ const PlantDataDetails = () => {
     try {
       const response = await axios.request(options);
       const allPlants = response.data || [];
-      const matched = allPlants.find((p) => p.id === id);
+      const matched = allPlants.find((p) => String(p.id) === String(id));
       setPlant(matched);
     } catch (error) {
       console.error("Error fetching plant details:", error);
@@ -39,7 +39,7 @@ const PlantDataDetails = () => {
   if (!plant) {
     return (
       <div className="p-6 text-center text-red-600 font-semibold">
-        Plant not found.
+        🌱 Plant not found.
       </div>
     );
   }
@@ -59,64 +59,93 @@ const PlantDataDetails = () => {
   } = plant;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded shadow">
-      <Link to="/explore" className="text-green-600 hover:underline block mb-4">
+    <div className="p-6 md:p-10 max-w-5xl mx-auto">
+      {/* Back Link */}
+      <Link
+        to="/plantsdata"
+        className="inline-flex items-center gap-2 text-[#3a684b] hover:underline font-medium mb-6"
+      >
         ← Back to Plants
       </Link>
 
-      <img
-        src={Img || "https://via.placeholder.com/500x300?text=No+Image"}
-        alt={commonName?.[0] || latinName}
-        className="w-full max-h-[300px] object-cover rounded mb-4"
-      />
+      {/* Card Container */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="md:flex">
+          {/* Image Section */}
+          <div className="md:w-1/2">
+            <img
+              src={Img || "https://via.placeholder.com/500x350?text=No+Image"}
+              alt={commonName?.[0] || latinName}
+              className="w-full h-72 md:h-full object-cover"
+            />
+          </div>
 
-      <h1 className="text-3xl font-bold mb-2">
-        {commonName?.[0] || "Unknown Plant"}
-      </h1>
-      <p className="italic text-gray-700 mb-4">
-        {latinName || "Latin name unknown"}
-      </p>
+          {/* Info Section */}
+          <div className="p-6 md:w-1/2 flex flex-col">
+            <h1 className="text-3xl font-extrabold text-[#1a382e] mb-2">
+              {commonName?.[0] || "Unknown Plant"}
+            </h1>
+            <p className="italic text-gray-600 mb-4 text-lg">
+              {latinName || "Latin name unknown"}
+            </p>
 
-      <div className="grid gap-2 text-sm text-gray-800">
-        {commonFr && (
-          <p>
-            <strong>Common Name (FR):</strong> {commonFr}
-          </p>
-        )}
-        {Family && (
-          <p>
-            <strong>Family:</strong> {Family}
-          </p>
-        )}
-        {Categories && (
-          <p>
-            <strong>Category:</strong> {Categories}
-          </p>
-        )}
-        {Origin && Origin.length > 0 && (
-          <p>
-            <strong>Origin:</strong> {Origin.join(", ")}
-          </p>
-        )}
-        {Climat && (
-          <p>
-            <strong>Climate:</strong> {Climat}
-          </p>
-        )}
-        {Zone && Zone.length > 0 && (
-          <p>
-            <strong>Zone:</strong> {Zone.join(", ")}
-          </p>
-        )}
-        {otherNames && (
-          <p>
-            <strong>Other Names:</strong> {otherNames}
-          </p>
-        )}
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {Categories && (
+                <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                  {Categories}
+                </span>
+              )}
+              {Family && (
+                <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                  {Family}
+                </span>
+              )}
+              {Climat && (
+                <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">
+                  {Climat}
+                </span>
+              )}
+            </div>
+
+            {/* Meta Info */}
+            <div className="space-y-3 text-gray-800 text-sm leading-relaxed">
+              {commonFr && (
+                <p>
+                  <strong className="text-gray-900">Common Name (FR):</strong>{" "}
+                  {commonFr}
+                </p>
+              )}
+              {Origin && Origin.length > 0 && (
+                <p>
+                  <strong className="text-gray-900">Origin:</strong>{" "}
+                  {Origin.join(", ")}
+                </p>
+              )}
+              {Zone && Zone.length > 0 && (
+                <p>
+                  <strong className="text-gray-900">Zone:</strong>{" "}
+                  {Zone.join(", ")}
+                </p>
+              )}
+              {otherNames && (
+                <p>
+                  <strong className="text-gray-900">Other Names:</strong>{" "}
+                  {otherNames}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Description Section */}
         {Description && (
-          <p>
-            <strong>Description:</strong> {Description}
-          </p>
+          <div className="px-6 py-6 border-t border-gray-100">
+            <h2 className="text-xl font-bold text-[#1a382e] mb-3">
+              🌱 Description
+            </h2>
+            <p className="text-gray-700 leading-relaxed">{Description}</p>
+          </div>
         )}
       </div>
     </div>

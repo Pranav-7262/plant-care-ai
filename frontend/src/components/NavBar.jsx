@@ -1,16 +1,14 @@
-// src/components/NavBar.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import PlantCareAILogo from "../assets/logo.svg.png";
-
+import PlantCareAILogo from "../assets/ai-plant-icon.jpg";
 import UserMenu from "./UserMenu";
 import {
   Menu,
   X,
   Home,
-  MessageCircle,
+  Bot,
   Compass,
   Sprout,
   PlusCircle,
@@ -18,14 +16,9 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-// --- Global Event Dispatcher ---
-// EXPORT THIS so you can import it in your Login component
 export const dispatchLoginEvent = () => {
   window.dispatchEvent(new CustomEvent("auth-status-changed"));
 };
-// -------------------------------
-
-// --- Custom Hook for Scroll Effect (keep this) ---
 const useScrollEffect = () => {
   const [scrolled, setScrolled] = useState(false);
 
@@ -40,7 +33,6 @@ const useScrollEffect = () => {
 
   return scrolled;
 };
-// -------------------------------------
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -70,26 +62,25 @@ const NavBar = () => {
     // 1. Initial check on mount
     checkAuthStatus();
 
-    // 2. Add event listener to react to status changes from other components (Login/Logout)
     window.addEventListener("auth-status-changed", checkAuthStatus);
 
-    // 3. Cleanup the listener
     return () => {
       window.removeEventListener("auth-status-changed", checkAuthStatus);
     };
   }, []);
 
   useEffect(() => {
+    // Closes the menu on route change
     if (isOpen) {
       setIsOpen(false);
     }
-  }, [navigate, isOpen]);
+  }, [navigate]); // Removed 'isOpen' from dependency array to prevent infinite loop
 
   const handleLogout = () => {
     localStorage.removeItem("userInfo");
     setUser(null);
     toast.success("Logged out successfully!");
-    // Dispatch event after logout to ensure other components also update
+
     dispatchLoginEvent();
     navigate("/auth");
   };
@@ -98,15 +89,19 @@ const NavBar = () => {
 
   const toggleExplore = () => setExploreOpen(!exploreOpen);
 
+  // --- UPDATED: navItemClass ---
   const navItemClass = ({ isActive }) =>
     `flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
       isActive
         ? "bg-green-700 text-white shadow-lg shadow-green-900/50"
         : "text-green-100 hover:bg-green-600/70 hover:text-white"
     }`;
-
-  const dropdownLinkClass =
-    "flex items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-green-50 transition-colors duration-200";
+  const dropdownLinkClass = ({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors duration-200 w-full ${
+      isActive
+        ? "bg-green-800 text-white"
+        : "hover:bg-green-600/50 md:hover:bg-green-50"
+    } ${scrolled ? "md:text-gray-800 text-white" : "md:text-white text-white"}`;
 
   const baseNavStyle = "bg-[#2a4d3a] transition-all duration-500 ease-in-out";
   const scrolledNavStyle =
@@ -118,35 +113,52 @@ const NavBar = () => {
         scrolled ? scrolledNavStyle : ""
       }`}
     >
-      {/* Logo: Circular Style */}
+      {/* Logo and Brand Name Group - Removed hover:scale-105 */}
       <div
         onClick={() => navigate("/")}
-        className={`flex items-center gap-2 cursor-pointer transition-transform duration-300 hover:scale-105 ${
+        className={`flex items-center gap-2 cursor-pointer transition-transform duration-300 ${
           scrolled ? "text-green-700" : "text-white"
         }`}
       >
-        <div className="w-9 h-9 rounded-full flex items-center justify-center shadow-md bg-white transition-all duration-500 ease-in-out">
+        {/* Logo Image */}
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden shadow-md">
           <img
             src={PlantCareAILogo}
             alt="PlantCareAI Logo"
-            className="w-8 h-8 object-contain"
+            className="w-full h-full object-cover"
           />
         </div>
 
-        <span className="hidden sm:inline text-lg font-montserrat font-extrabold">
-          PlantCareAI
-        </span>
-      </div>
+        <div className="flex items-center gap-2">
+          {/* Improved text clarity and font size for better visual presence */}
+          <span className="hidden sm:inline text-lg sm:text-xl font-montserrat font-extrabold tracking-tight">
+            PlantCareAI
+          </span>
 
-      {/* Nav Links Container (Mobile Drawer / Desktop Row) */}
+          <span className="hidden sm:inline text-gray-400 text-base font-normal">
+            |
+          </span>
+          <a
+            href="/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`hidden sm:inline text-sm font-medium transition-colors duration-300 opacity-80 hover:opacity-100 ${
+              scrolled
+                ? "text-green-700 hover:text-green-900"
+                : "text-white hover:text-green-100"
+            }`}
+          >
+            Docs
+          </a>
+        </div>
+      </div>
       <div
         className={`${
           isOpen ? "translate-x-0" : "translate-x-full"
         } fixed top-0 right-0 h-full w-64 bg-[#1e3c2c] transition-transform duration-500 ease-in-out flex flex-col pt-16
-           md:static md:translate-x-0 md:flex md:w-auto md:bg-transparent md:h-auto md:flex-row md:items-center md:p-0`}
+            md:static md:translate-x-0 md:flex md:w-auto md:bg-transparent md:h-auto md:flex-row md:items-center md:p-0`}
       >
         <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-5 p-4 md:p-0 w-full md:w-auto">
-          {/* Close button for mobile menu */}
           <button
             className="md:hidden absolute top-4 right-4 text-white p-2 hover:bg-white/10 rounded-full"
             onClick={toggleMenu}
@@ -154,16 +166,13 @@ const NavBar = () => {
             <X size={26} />
           </button>
 
-          {/* Navigation Links (Unchanged) */}
           <NavLink to="/" className={navItemClass}>
             <Home size={18} /> <span>Home</span>
           </NavLink>
 
           <NavLink to="/chat" className={navItemClass}>
-            <MessageCircle size={18} /> <span>Chat</span>
+            <Bot size={18} /> <span>PlantBot</span>
           </NavLink>
-
-          {/* Explore Dropdown (Unchanged) */}
           <div
             className="relative w-full md:w-auto"
             onMouseEnter={() =>
@@ -174,7 +183,7 @@ const NavBar = () => {
             }
           >
             <button
-              onClick={toggleExplore}
+              onClick={toggleExplore} // Click toggles on all screens
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-full md:w-auto justify-start md:justify-center transition-all duration-300 ${
                 exploreOpen
                   ? "bg-green-700 text-white"
@@ -192,31 +201,28 @@ const NavBar = () => {
 
             {exploreOpen && (
               <div
-                className={`absolute ${
+                className={`relative md:absolute ${
                   scrolled
-                    ? "md:bg-white text-gray-800"
-                    : "md:bg-[#2a4d3a] text-white"
-                } left-0 w-full md:w-60 rounded-xl shadow-2xl overflow-hidden z-50 mt-2 md:mt-0 md:border md:border-green-100/20`}
+                    ? "md:bg-[#2a4d3a]" // Scrolled desktop background
+                    : "md:bg-[#2a4d3a]" // Unscrolled desktop background
+                } left-0 w-full md:w-60 rounded-xl md:shadow-2xl overflow-hidden z-50 mt-2 md:mt-0 md:border md:border-green-100/20`}
               >
-                <NavLink to="/explore" className={dropdownLinkClass}>
-                  🌿 Plant Diseases
-                </NavLink>
-                <NavLink to="/plantsdata" className={dropdownLinkClass}>
-                  🪴 Household Plant Collection
-                </NavLink>
-                <NavLink to="/explore/plantsdata" className={dropdownLinkClass}>
-                  🌱 Plant Data
-                </NavLink>
+                {/* Wrapper for mobile indentation */}
+                <div className="flex flex-col md:block py-1 md:py-0 pl-2 md:pl-0">
+                  <NavLink to="/explore" className={dropdownLinkClass}>
+                    🐛 Plant Disease
+                  </NavLink>
+                  <NavLink to="/plantsdata" className={dropdownLinkClass}>
+                    🪴 Household Plant Collection
+                  </NavLink>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Conditional links based on user status */}
           <NavLink to="/my-plants" className={navItemClass}>
             <Sprout size={18} /> <span>My Plants</span>
           </NavLink>
-
-          {/* Add Plant Link only visible if user is logged in */}
           {user && (
             <NavLink to="/add-plant" className={navItemClass}>
               <PlusCircle size={18} /> <span>Add Plant</span>
@@ -239,8 +245,6 @@ const NavBar = () => {
           </div>
         </div>
       </div>
-
-      {/* Mobile Toggle Button */}
       <button
         className={`md:hidden p-2 rounded-full z-50 transition-colors duration-300 ${
           scrolled
@@ -251,8 +255,6 @@ const NavBar = () => {
       >
         {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
-
-      {/* Overlay for mobile menu */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"

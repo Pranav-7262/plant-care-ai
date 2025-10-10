@@ -124,14 +124,13 @@ export default function AddPlant() {
           {/* Species */}
           <div className="space-y-1">
             <label className="block text-base font-semibold text-gray-700">
-              Species <span className="text-red-500">*</span>
+              Species <span className="text-red-500"></span>
             </label>
             <input
               type="text"
               name="species"
               value={form.species}
               onChange={handleChange}
-              required
               className="w-full p-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-500 transition duration-150 shadow-sm placeholder:text-gray-400"
               placeholder="E.g. Spathiphyllum wallisii"
             />

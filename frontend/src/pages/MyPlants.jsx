@@ -22,8 +22,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import NoUser from "../components/NoUser";
+import NoPlantsFound from "../components/NoPlantsFound";
 
-// --- Constants for Dropdown/Filter Options ---
 const healthOptions = ["Healthy", "Needs Attention", "Sick"];
 const locationOptions = [
   "Living Room",
@@ -46,7 +46,6 @@ const categoryOptions = [
 const defaultPlantImg =
   "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=300&q=80";
 
-// --- PAGINATION CONSTANTS ---
 const ITEMS_PER_PAGE = 6; // Set to 6 plants per page
 
 export default function MyPlants() {
@@ -57,7 +56,6 @@ export default function MyPlants() {
   const [user, setUser] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  // --- PAGINATION STATE ---
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState({
@@ -70,7 +68,6 @@ export default function MyPlants() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // ... (User and Data Fetching Logic)
     const storedUser = localStorage.getItem("userInfo");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
@@ -91,11 +88,7 @@ export default function MyPlants() {
     } else {
       setLoading(false);
     }
-    // Reset to page 1 whenever search/filters change in the effect
-    // NOTE: This effect runs only on mount, but resetting the page here is fine.
   }, []);
-
-  // Effect to reset page when search or filters change outside of the initial mount
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filters]);
@@ -125,8 +118,6 @@ export default function MyPlants() {
         favouriteMatch
       );
     });
-    // The pagination logic for setting the correct page after filtering is now
-    // handled within the useMemo to ensure it runs *before* slice.
     const totalPages = Math.ceil(list.length / ITEMS_PER_PAGE);
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
@@ -136,7 +127,6 @@ export default function MyPlants() {
     return list;
   }, [plants, search, filters]); // Removed currentPage from dependency array to prevent infinite loop
 
-  // --- PAGINATION LOGIC ---
   const totalPages = Math.ceil(filteredPlants.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentPlants = filteredPlants.slice(
@@ -151,7 +141,6 @@ export default function MyPlants() {
     }
   };
 
-  // Create an array of page numbers for the pagination buttons
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesToShow = 5;
@@ -214,7 +203,6 @@ export default function MyPlants() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    // Removed setCurrentPage(1) here as it's now handled by the useEffect above
   };
 
   const handleClearFilters = () => {
@@ -224,9 +212,11 @@ export default function MyPlants() {
       category: "",
       showFavourites: false,
     });
-    // Removed setCurrentPage(1) here as it's now handled by the useEffect above
   };
 
+  const handleAddPlant = () => {
+    navigate("/add-plant");
+  };
   // --- Render Conditionals ---
   if (loading) return <Spinner />;
   if (!user) return <NoUser />;
@@ -292,8 +282,6 @@ export default function MyPlants() {
           </span>
         </div>
       </div>
-
-      {/* FILTER MODAL / DROPDOWN (Remains the same as previous) */}
       {showFilters && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -338,8 +326,6 @@ export default function MyPlants() {
                   ))}
                 </select>
               </div>
-
-              {/* Location Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Location
@@ -418,16 +404,8 @@ export default function MyPlants() {
         </motion.div>
       )}
 
-      {/* PLANTS LIST */}
       {filteredPlants.length === 0 ? (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center text-gray-500 italic mt-10 p-10 bg-white rounded-xl shadow-lg"
-        >
-          No plants match your search and filter criteria. Try broadening your
-          search!
-        </motion.p>
+        <NoPlantsFound onAddPlantClick={handleAddPlant} />
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -500,12 +478,15 @@ export default function MyPlants() {
                       >
                         <Sprout size={14} /> Health: {plant.health}
                       </p>
-                      {plant.reminder && (
-                        <p className="text-sm flex items-center gap-1 font-medium text-indigo-600 p-2 bg-indigo-50 rounded-lg border border-indigo-200">
-                          <Bell size={16} className="text-indigo-500" />{" "}
-                          Reminder: {plant.reminder}
-                        </p>
-                      )}
+                      <p className="text-sm flex items-center gap-1 font-medium text-indigo-600 p-2 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <Bell size={16} className="text-indigo-500" />
+                        {plant.reminder ? (
+                          <>Reminder: {plant.reminder}</>
+                        ) : (
+                          <>Reminder coming soon</>
+                        )}
+                      </p>
+
                       {plant.nextWatering && (
                         <p className="text-sm flex items-center gap-1 text-sky-600">
                           <Droplet size={14} /> Needs water on:{" "}
